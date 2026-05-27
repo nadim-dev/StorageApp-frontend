@@ -1,0 +1,49 @@
+<svg width="512" height="512" viewBox="72 82 406 340" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Cloud -->
+  <g stroke="#000" stroke-width="16" fill="#4A90C9">
+    <path d="
+      M150 320
+      H380
+      C440 320 470 280 470 240
+      C470 200 440 170 400 170
+      C390 120 350 90 300 90
+      C250 90 210 120 200 160
+      C170 150 140 170 140 200
+      C100 210 80 240 80 270
+      C80 300 110 320 150 320
+      Z" />
+  </g>
+
+  <!-- Cloud Highlight -->
+  <path d="M230 130
+           C260 110 310 110 340 150"
+        stroke="#2F6FA3"
+        stroke-width="12"
+        fill="none"
+        stroke-linecap="round"/>
+
+  <!-- Folder -->
+  <g stroke="#000" stroke-width="14">
+    <!-- Folder Back -->
+    <rect x="160" y="300" width="200" height="110" rx="20" fill="#FF9800"/>
+    
+    <!-- Folder Tab -->
+    <path d="M160 300
+             L210 300
+             L240 270
+             H330
+             V300
+             Z"
+          fill="#FFB74D"/>
+  </g>
+
+  <!-- File inside folder -->
+  <g stroke="#000" stroke-width="12">
+    <rect x="200" y="260" width="150" height="90" rx="10" fill="#E0E0E0"/>
+    <line x1="230" y1="290" x2="320" y2="290" stroke="#000"/>
+    <line x1="230" y1="315" x2="300" y2="315" stroke="#000"/>
+  </g>
+
+</svg>
+

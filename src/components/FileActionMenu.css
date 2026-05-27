@@ -1,0 +1,124 @@
+/* ===== FILE ACTION MENU ===== */
+.file-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 998;
+}
+
+.file-action-menu {
+  position: absolute;
+  right: 0;
+  top: 34px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #d8e6f5;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  min-width: 164px;
+  padding: 4px 0;
+  z-index: 999;
+  animation: slideDown 0.1s ease-out;
+  will-change: transform, opacity;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 12px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #202124;
+  text-align: left;
+  transition: background-color 0.1s ease;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.file-menu-item:hover {
+  background-color: #f8f9fa;
+}
+
+.file-menu-item:active {
+  background-color: #f1f3f4;
+}
+
+.file-menu-item svg {
+  flex-shrink: 0;
+  color: #5f6368;
+  width: 15px;
+  height: 15px;
+}
+
+.file-menu-item span {
+  flex: 1;
+}
+
+.file-menu-item-delete {
+  color: #d93025;
+}
+
+.file-menu-item-delete:hover {
+  background-color: #fde7e6;
+}
+
+.file-menu-item-delete svg {
+  color: #d93025;
+}
+
+.file-menu-divider {
+  height: 1px;
+  background-color: #e8eaed;
+  margin: 4px 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .file-action-menu {
+    min-width: 156px;
+  }
+
+  .file-menu-item {
+    padding: 8px 10px;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .file-menu-item svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .file-action-menu {
+    min-width: 148px;
+  }
+
+  .file-menu-item {
+    padding: 8px 10px;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .file-menu-item svg {
+    width: 14px;
+    height: 14px;
+  }
+}
