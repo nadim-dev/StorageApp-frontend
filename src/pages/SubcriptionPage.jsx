@@ -64,7 +64,7 @@ export const SubcriptionPage = () => {
         });
         setTimeout(()=>{
           navigate("/")
-        },1300)
+        },3000)
       },
     });
 
@@ -92,7 +92,7 @@ export const SubcriptionPage = () => {
 
       order_id: orderId,
 
-      name: "CloudNest Upgrade",
+      name: "CloudNest Payment Upgradation",
 
       handler(response) {
         console.log(response);
@@ -100,6 +100,7 @@ export const SubcriptionPage = () => {
           type: "success",
           title: "Upgrade complete",
         });
+        navigate("/");
       },
     });
 

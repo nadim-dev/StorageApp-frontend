@@ -136,8 +136,7 @@ export default function ManagePlan() {
   const { currentUser } = useAuth();
   //* calculating user storage here
   const usagePercent = Math.min(
-    100,
-    (currentUser.usedStorage / currentUser.maxStorageInBytes) * 100,
+    100,(currentUser.usedStorage / currentUser.maxStorageInBytes) * 100,
   );
   const unusedSpace = Math.max(
     0,
