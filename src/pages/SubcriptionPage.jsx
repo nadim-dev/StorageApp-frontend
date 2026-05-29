@@ -94,13 +94,15 @@ export const SubcriptionPage = () => {
 
       name: "CloudNest Payment Upgradation",
 
-      handler(response) {
+      handler: async (response)=> {
         console.log(response);
         showToast("Your plan upgrade payment was completed.", {
           type: "success",
           title: "Upgrade complete",
         });
-        navigate("/");
+          setTimeout(()=>{
+          navigate("/")
+        },3000);
       },
     });
 
