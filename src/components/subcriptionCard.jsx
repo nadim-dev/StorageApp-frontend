@@ -2,18 +2,17 @@ import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-
 function SubscriptionCard({
   plan,
   currentUserPlanId,
   loading,
   onUpgrade,
-  currentUserLevel
+  currentUserLevel,
 }) {
   const isCurrentPlan = currentUserPlanId === plan.id;
-  console.log("plan",plan.level);
-  console.log("currentUserPlanId",currentUserPlanId);
-  console.log("currentUserLevel",currentUserLevel);
+  console.log("plan", plan.level);
+  console.log("currentUserPlanId", currentUserPlanId);
+  console.log("currentUserLevel", currentUserLevel);
   return (
     <Card
       className={`
@@ -21,19 +20,21 @@ function SubscriptionCard({
         transition-all duration-300
         border bg-white
 
-        ${plan.popular
-          ? "border-blue-500 shadow-xl shadow-blue-100"
-          : "border-slate-200"
+        ${
+          plan.popular
+            ? "border-blue-500 shadow-xl shadow-blue-100"
+            : "border-slate-200"
         }
 
-        ${isCurrentPlan
-          ? `
+        ${
+          isCurrentPlan
+            ? `
             border-2 border-blue-600
             bg-gradient-to-b from-blue-50 via-white to-white
             scale-[1.01]
             shadow-2xl shadow-blue-200/60
           `
-          : `
+            : `
             hover:-translate-y-1
             hover:shadow-xl
             hover:border-blue-300
@@ -75,58 +76,53 @@ function SubscriptionCard({
         </div>
       )}
 
-      <CardContent className="relative z-10 p-6 flex flex-col h-full">
+      <CardContent className="relative z-10 p-5 flex flex-col h-full">
         {/* Header */}
-        <div className="mb-5">
-          <h3 className="text-2xl font-bold text-slate-900">
-            {plan.name}
-          </h3>
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-xs text-slate-500">
             Secure cloud storage for modern users.
           </p>
         </div>
 
         {/* Storage */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div
             className={`
-              text-5xl font-black tracking-tight
+              text-4xl font-black tracking-tight
 
-              ${isCurrentPlan
-                ? "text-blue-700"
-                : "text-blue-600"
-              }
+              ${isCurrentPlan ? "text-blue-700" : "text-blue-600"}
             `}
           >
             {plan.storage}
           </div>
 
-          <div className="text-sm font-medium text-slate-500 mt-1">
+          <div className="text-xs font-medium text-slate-500 mt-1">
             Cloud Storage
           </div>
         </div>
 
         {/* Price */}
-        <div className="border-t border-slate-200 pt-5 mb-6">
+        <div className="border-t border-slate-200 pt-4 mb-4">
           <div className="flex items-end gap-1">
-            <span className="text-4xl font-extrabold text-slate-900">
+            <span className="text-3xl font-extrabold text-slate-900">
               ₹{plan.price}
             </span>
 
-            <span className="text-sm text-slate-500 mb-1">
+            <span className="text-xs text-slate-500 mb-0.5">
               /{plan.billingCycle}
             </span>
           </div>
 
           {plan.discount && (
-            <div className="mt-2">
+            <div className="mt-1.5">
               <span
                 className="
                   inline-flex
                   bg-green-100 text-green-700
                   text-xs font-semibold
-                  px-2 py-1 rounded-md
+                  px-2 py-0.5 rounded-md
                 "
               >
                 {plan.discount}
@@ -136,24 +132,21 @@ function SubscriptionCard({
         </div>
 
         {/* Features */}
-        <div className="space-y-3 flex-1">
+        <div className="space-y-2.5 flex-1">
           {plan.features.map((feature) => (
-            <div
-              key={feature}
-              className="flex items-center gap-3"
-            >
+            <div key={feature} className="flex items-center gap-2.5">
               <div
                 className="
                   flex items-center justify-center
-                  w-5 h-5 rounded-full
+                  w-4 h-4 rounded-full
                   bg-blue-100 text-blue-600
                   shrink-0
                 "
               >
-                <Check size={12} strokeWidth={3.5} />
+                <Check size={10} strokeWidth={3.5} />
               </div>
 
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-xs font-medium text-slate-700">
                 {feature}
               </span>
             </div>
@@ -161,17 +154,18 @@ function SubscriptionCard({
         </div>
 
         {/* Button */}
-        <div className="mt-6">
+        <div className="mt-5">
           <Button
             disabled={loading || isCurrentPlan}
             onClick={() => onUpgrade(plan.id)}
             className={`
-              w-full h-11 rounded-xl
+              w-full h-10 rounded-lg
               text-sm font-semibold
               transition-all duration-300
 
-              ${isCurrentPlan
-                ? `
+              ${
+                isCurrentPlan
+                  ? `
                   bg-green-600
                   hover:bg-green-600
                   text-white
@@ -179,12 +173,12 @@ function SubscriptionCard({
                   pointer-events-none
                   cursor-not-allowed
                 `
-                : plan.popular
-                  ? `
+                  : plan.popular
+                    ? `
                     bg-blue-600 hover:bg-blue-700
                     text-white shadow-lg
                   `
-                  : `
+                    : `
                     bg-slate-900 hover:bg-slate-800
                     text-white
                   `
@@ -193,13 +187,13 @@ function SubscriptionCard({
           >
             {isCurrentPlan
               ? "✓ Current Plan"
-              :  plan.level < currentUserLevel
+              : plan.level < currentUserLevel
                 ? "Downgrade Plan"
                 : "Upgrade Plan"}
           </Button>
 
           {isCurrentPlan && (
-            <p className="text-center text-xs text-slate-500 mt-3">
+            <p className="text-center text-xs text-slate-500 mt-2">
               Your subscription is active
             </p>
           )}
