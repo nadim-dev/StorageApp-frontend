@@ -3,10 +3,12 @@ import SubscriptionCard from "../components/subcriptionCard.jsx";
 import Toast from "../components/Toast.jsx";
 import useToast from "../hooks/useToast.js";
 import "../SubscriptionPage.css";
-import {subcribeStorage,getCurrentSubscription,} from "@/api/subcriptionApi.js";
-import {SUBSCRIPTION_PLANS} from "../constants/subscriptionPlans.js" 
+import {
+  subcribeStorage,
+  getCurrentSubscription,
+} from "@/api/subcriptionApi.js";
+import { SUBSCRIPTION_PLANS } from "../constants/subscriptionPlans.js";
 import { useNavigate } from "react-router-dom";
-
 
 function loadRazorpaySdk() {
   const razorpayScript = document.querySelector("#razorpay-script");
@@ -23,12 +25,12 @@ export const SubcriptionPage = () => {
   const [mode, setMode] = useState("monthly");
   const [currentUserPlan, serCurrentUserPlan] = useState(null);
   const { toast, showToast, hideToast } = useToast();
-  const navigate=useNavigate();
-  
+  const navigate = useNavigate();
+
   useEffect(() => {
     const currentSubscriptionPlan = async () => {
       try {
-        const data= await getCurrentSubscription();
+        const data = await getCurrentSubscription();
         serCurrentUserPlan(data);
       } catch (err) {
         console.error("Failed to fetch current subscription:", err);
@@ -41,93 +43,119 @@ export const SubcriptionPage = () => {
     loadRazorpaySdk();
   }, []);
 
-  const openSubscriptionPopup = useCallback((subcriptionId) => {
-    if (!window.Razorpay) {
-      showToast("Payment checkout is still loading. Please try again.", {
-        type: "warning",
-        title: "Almost ready",
-      });
-      return;
-    }
-
-    const razorpay = new window.Razorpay({
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      subscription_id: subcriptionId,
-      start_at: Math.floor(Date.now() / 1000),
-      quantity:1,
-      name: "CloudNest",
-      handler: async function () {
-        showToast("Your subscription was purchased successfully.", {
-          type: "success",
-          title: "Plan activated",
-          duration: 1600,
+  const openSubscriptionPopup = useCallback(
+    (subcriptionId) => {
+      if (!window.Razorpay) {
+        showToast("Payment checkout is still loading. Please try again.", {
+          type: "warning",
+          title: "Almost ready",
         });
-        setTimeout(()=>{
-          navigate("/")
-        },3000)
-      },
-    });
+        return;
+      }
 
-    razorpay.on("payment.failed", function (response) {
-      console.log(response);
-      showToast("Payment failed. Please try again or use another payment method.", {
-        type: "error",
-        title: "Payment failed",
+      const razorpay = new window.Razorpay({
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        subscription_id: subcriptionId,
+        start_at: Math.floor(Date.now() / 1000),
+        quantity: 1,
+        name: "CloudNest",
+        handler: async function () {
+          showToast("Your subscription was purchased successfully.", {
+            type: "success",
+            title: "Plan activated",
+            duration: 1600,
+          });
+          setTimeout(() => {
+            navigate("/");
+          }, 3000);
+        },
       });
-    });
-    razorpay.open();
-  }, [navigate, showToast]);
 
-  const openUpgradePaymentPopup = useCallback((orderId) => {
-    if (!window.Razorpay) {
-      showToast("Payment checkout is still loading. Please try again.", {
-        type: "warning",
-        title: "Almost ready",
-      });
-      return;
-    }
-
-    const razorpay = new window.Razorpay({
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-
-      order_id: orderId,
-
-      name: "CloudNest Payment Upgradation",
-
-      handler: async (response)=> {
+      razorpay.on("payment.failed", function (response) {
         console.log(response);
-        showToast("Your plan upgrade payment was completed.", {
-          type: "success",
-          title: "Upgrade complete",
-        });
-          setTimeout(()=>{
-          navigate("/")
-        },3000);
-      },
-    });
-
-    razorpay.on("payment.failed", function (response) {
-      console.log(response);
-      showToast("Upgrade payment failed. Please try again.", {
-        type: "error",
-        title: "Payment failed",
+        showToast(
+          "Payment failed. Please try again or use another payment method.",
+          {
+            type: "error",
+            title: "Payment failed",
+          },
+        );
       });
-    });
+      razorpay.open();
+    },
+    [navigate, showToast],
+  );
 
-    razorpay.open();
-  }, [showToast]);
+  const openUpgradePaymentPopup = useCallback(
+    (orderId) => {
+      if (!window.Razorpay) {
+        showToast("Payment checkout is still loading. Please try again.", {
+          type: "warning",
+          title: "Almost ready",
+        });
+        return;
+      }
+
+      const razorpay = new window.Razorpay({
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+
+        order_id: orderId,
+
+        name: "CloudNest Payment Upgradation",
+
+        handler: async (response) => {
+          console.log(response);
+          showToast("Your plan upgrade payment was completed.", {
+            type: "success",
+            title: "Upgrade complete",
+          });
+          setTimeout(() => {
+            navigate("/");
+          }, 3000);
+        },
+      });
+
+      razorpay.on("payment.failed", function (response) {
+        console.log(response);
+        showToast("Upgrade payment failed. Please try again.", {
+          type: "error",
+          title: "Payment failed",
+        });
+      });
+
+      razorpay.open();
+    },
+    [showToast],
+  );
 
   const onUpgrade = async (planId) => {
     try {
       const response = await subcribeStorage({ planId });
-      console.log(response);
-      if (response.type === "upgrade") openUpgradePaymentPopup(response.orderId);
-      else{
+      console.log("📦 Full Response Object:", response);
+    
+
+      if (response.type === "upgrade")
+        openUpgradePaymentPopup(response.orderId);
+      else if (response.type == "subscription_scheduled") {
+        showToast("A subscription change is already scheduled", {
+          type: "info",
+          title: "Change Already Scheduled",
+        });
+      } else if (response.type == "downgrade_scheduled") {
+        showToast("Your downgrade will take effect from next billing cycle", {
+          type: "info",
+          title: "Downgrade Scheduled",
+        });
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
+      } else {
         console.log("else part is running");
         openSubscriptionPopup(response.message);
       }
     } catch (err) {
-      console.error("Failed to start subscription:", err);
+      console.log("error part is running");
+      console.error("Failed to start subscription:", err.message);
       showToast("Could not start the subscription payment. Please try again.", {
         type: "error",
         title: "Something went wrong",
@@ -136,7 +164,6 @@ export const SubcriptionPage = () => {
   };
 
   const plans = SUBSCRIPTION_PLANS[mode];
-
 
   return (
     <main className="subscription-page">

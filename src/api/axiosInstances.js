@@ -1,11 +1,22 @@
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-const onSuccess = (response) => response.data;
+const onSuccess = (response) => {
+  console.log("✅ Axios Success Response:");
+  console.log("  Status:", response.status);
+  console.log("  Data:", response.data);
+  console.log("  URL:", response.config?.url);
+  return response.data;
+};
 const onError = (error) => {
+  console.error("🔴 Axios Error Interceptor Triggered:");
+  console.error("  Status:", error.response?.status);
+  console.error("  Message:", error.response?.data?.message);
+
   const requestError = new Error(
-    error.response?.data?.message || "Something went wrong"
+    error.response?.data?.message || "Something went wrong",
   );
+  
   requestError.status = error.response?.status;
   requestError.data = error.response?.data;
 
