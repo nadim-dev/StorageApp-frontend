@@ -1,10 +1,28 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Camera, User, Mail, Briefcase, Lock, Eye, EyeOff, LogOut, Save, Shield } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Camera,
+  User,
+  Mail,
+  Briefcase,
+  Lock,
+  Eye,
+  EyeOff,
+  LogOut,
+  Save,
+  Shield,
+  Clock,
+  Zap,
+  CheckCircle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
 import "../ProfilePage.css";
-import { useAuth } from '../context/authContext';
-import { logoutUserFromAllDevice, updatePassword, updateProfile } from '../api/userApi.js';
+import { useAuth } from "../context/authContext";
+import {
+  logoutUserFromAllDevice,
+  updatePassword,
+  updateProfile,
+} from "../api/userApi.js";
 
 export default function ProfilePage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -30,9 +48,9 @@ export default function ProfilePage() {
   });
 
   const [password, setPassword] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const { currentUser, setCurrentUser } = useAuth();
@@ -74,9 +92,13 @@ export default function ProfilePage() {
       return;
     }
 
-    const payload = (authProvider === "google" || authProvider === "Github")
-      ? { newPassword: password.newPassword }
-      : { newPassword: password.newPassword, currentPassword: password.currentPassword };
+    const payload =
+      authProvider === "google" || authProvider === "Github"
+        ? { newPassword: password.newPassword }
+        : {
+            newPassword: password.newPassword,
+            currentPassword: password.currentPassword,
+          };
 
     try {
       const data = await updatePassword(payload);
@@ -91,7 +113,11 @@ export default function ProfilePage() {
         navigate("/login");
       }
     } finally {
-      setPassword({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPassword({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     }
   };
 
@@ -155,17 +181,15 @@ export default function ProfilePage() {
       data.append("avatar", avatarFile);
     }
 
-
     if (![...data.keys()].length) {
       return;
     }
 
-    
     try {
       setSaving(true);
-      const updated=await updateProfile(data);
-      console.log("previous picture",profile.picture);
-      console.log("updated picture",updated.picture);      
+      const updated = await updateProfile(data);
+      console.log("previous picture", profile.picture);
+      console.log("updated picture", updated.picture);
       setProfile((prev) => ({
         ...prev,
         name: updated.name ?? prev.name,
@@ -181,9 +205,9 @@ export default function ProfilePage() {
               name: updated.name ?? prev.name,
               picture: updated.picture ?? prev.picture,
             }
-          : prev
+          : prev,
       );
-      console.log("profile page ka updated user",currentUser);
+      console.log("profile page ka updated user", currentUser);
       setAvatarFile(null);
       setAvatarPreview("");
       if (fileInputRef.current) {
@@ -217,11 +241,13 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page">
-      <div className="profile-shell">
-        <section className="profile-hero">
-          <div className="profile-hero-cover" />
-          <div className="profile-hero-content">
-            <div className="profile-avatar-wrap">
+      <div className="profile-container">
+        {/* Hero Section with Avatar */}
+        <section className="profile-hero-section">
+          <div className="hero-background"></div>
+          <div className="hero-content">
+            <div className="avatar-container">
+              <div className="avatar-glow"></div>
               <div className="profile-avatar">
                 {avatarSrc ? (
                   <img src={avatarSrc} alt={profile.name || "User avatar"} />
@@ -235,7 +261,7 @@ export default function ProfilePage() {
                 className="avatar-edit-btn"
                 aria-label="Change profile photo"
               >
-                <Camera size={14} />
+                <Camera size={16} />
               </button>
               <input
                 type="file"
@@ -246,69 +272,120 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="profile-user-meta">
-              <h1>{originalProfile.name || "Your profile"}</h1>
-              <div className="profile-meta-row">
-                <span className="profile-meta-pill">
-                  <Mail size={14} />
-                  {profile.email || "No email"}
-                </span>
-                <span className="profile-role-pill">
-                  <Briefcase size={14} />
+            <div className="user-info">
+              <h1 className="user-name">{originalProfile.name || "Welcome"}</h1>
+              <p className="user-email">{profile.email || "No email"}</p>
+              <div className="user-badges">
+                <span className="badge badge-role">
+                  <Briefcase size={13} />
                   {profile.role || "User"}
+                </span>
+                <span className="badge badge-status">
+                  <CheckCircle size={13} />
+                  Active
                 </span>
               </div>
             </div>
           </div>
         </section>
 
-        <div className="profile-grid">
+        {/* Stats Cards */}
+        <section className="stats-section">
+          <div className="stat-card">
+            <div className="stat-icon stat-icon-blue">
+              <Zap size={20} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-label">Profile Status</p>
+              <p className="stat-value">Complete</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon stat-icon-green">
+              <Clock size={20} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-label">Auth Provider</p>
+              <p className="stat-value">
+                {authProvider === "local" ? "Email" : authProvider}
+              </p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon stat-icon-purple">
+              <Shield size={20} />
+            </div>
+            <div className="stat-content">
+              <p className="stat-label">Security</p>
+              <p className="stat-value">Protected</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Main Content Grid */}
+        <div className="profile-content-grid">
+          {/* Profile Information Card */}
           <section className="profile-card">
-            <h2 className="profile-card-title">
-              <User size={18} />
-              Profile Information
-            </h2>
+            <div className="card-header">
+              <div className="card-icon-wrapper">
+                <User size={18} />
+              </div>
+              <h2 className="card-title">Profile Information</h2>
+            </div>
 
-            <div className="profile-form-stack">
-              <label className="profile-field">
-                <span>Username</span>
-                <input
-                  type="text"
-                  value={profile.name}
-                  onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter username"
-                />
-              </label>
+            <div className="form-group-container">
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <div className="input-wrapper">
+                  <User size={15} />
+                  <input
+                    type="text"
+                    value={profile.name}
+                    onChange={(e) =>
+                      setProfile((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    placeholder="Enter username"
+                    className="form-input"
+                  />
+                </div>
+              </div>
 
-              <label className="profile-field">
-                <span>Email Address</span>
-                <div className="profile-readonly">
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <div className="input-wrapper read-only">
                   <Mail size={15} />
                   <span>{profile.email}</span>
                 </div>
-              </label>
+              </div>
 
-              <label className="profile-field">
-                <span>Role</span>
-                <div className="profile-readonly">
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <div className="input-wrapper read-only">
                   <Briefcase size={15} />
-                  <span>{profile.role}</span>
+                  <span>{profile.role || "User"}</span>
                 </div>
-              </label>
+              </div>
             </div>
           </section>
 
+          {/* Password & Security Card */}
           <section className="profile-card">
-            <h2 className="profile-card-title">
-              <Shield size={18} />
-              Password & Security
-            </h2>
+            <div className="card-header">
+              <div className="card-icon-wrapper">
+                <Shield size={18} />
+              </div>
+              <h2 className="card-title">Password & Security</h2>
+            </div>
 
-            <form onSubmit={handleUpdatePassword} className="profile-form-stack">
+            <form
+              onSubmit={handleUpdatePassword}
+              className="form-group-container"
+            >
               {authProvider === "local" && (
-                <label className="profile-field">
-                  <span>Current Password</span>
-                  <div className="profile-password-input">
+                <div className="form-group">
+                  <label className="form-label">Current Password</label>
+                  <div className="input-wrapper password-wrapper">
+                    <Lock size={15} />
                     <input
                       type={showCurrentPassword ? "text" : "password"}
                       name="currentPassword"
@@ -316,27 +393,42 @@ export default function ProfilePage() {
                       onChange={handleInputPassword}
                       required
                       placeholder="Enter current password"
+                      className="form-input"
                     />
                     <button
                       type="button"
+                      className="toggle-password-btn"
                       onClick={() => setShowCurrentPassword((prev) => !prev)}
-                      aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+                      aria-label={
+                        showCurrentPassword
+                          ? "Hide current password"
+                          : "Show current password"
+                      }
                     >
-                      {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showCurrentPassword ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
                     </button>
                   </div>
-                </label>
+                </div>
               )}
 
               {(authProvider === "google" || authProvider === "Github") && (
-                <p className="profile-provider-note">
-                  You signed in with {authProvider}. Set a password to enable email login.
-                </p>
+                <div className="provider-info">
+                  <Zap size={16} />
+                  <p>
+                    You signed in with <strong>{authProvider}</strong>. Set a
+                    password to enable email login.
+                  </p>
+                </div>
               )}
 
-              <label className="profile-field">
-                <span>New Password</span>
-                <div className="profile-password-input">
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <div className="input-wrapper password-wrapper">
+                  <Lock size={15} />
                   <input
                     type={showNewPassword ? "text" : "password"}
                     name="newPassword"
@@ -344,20 +436,27 @@ export default function ProfilePage() {
                     onChange={handleInputPassword}
                     required
                     placeholder="Enter new password"
+                    className="form-input"
                   />
                   <button
                     type="button"
+                    className="toggle-password-btn"
                     onClick={() => setShowNewPassword((prev) => !prev)}
-                    aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+                    aria-label={
+                      showNewPassword
+                        ? "Hide new password"
+                        : "Show new password"
+                    }
                   >
                     {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-              </label>
+              </div>
 
-              <label className="profile-field">
-                <span>Confirm New Password</span>
-                <div className="profile-password-input">
+              <div className="form-group">
+                <label className="form-label">Confirm New Password</label>
+                <div className="input-wrapper password-wrapper">
+                  <Lock size={15} />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
@@ -365,21 +464,40 @@ export default function ProfilePage() {
                     onChange={handleInputPassword}
                     required
                     placeholder="Confirm new password"
+                    className="form-input"
                   />
                   <button
                     type="button"
+                    className="toggle-password-btn"
                     onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                    aria-label={
+                      showConfirmPassword
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }
                   >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
                   </button>
                 </div>
-              </label>
+              </div>
 
-              {passwordError && <p className="profile-alert profile-alert-error">{passwordError}</p>}
-              {successPassword && <p className="profile-alert profile-alert-success">{successPassword}</p>}
+              {passwordError && (
+                <div className="alert alert-error">
+                  <span>{passwordError}</span>
+                </div>
+              )}
+              {successPassword && (
+                <div className="alert alert-success">
+                  <CheckCircle size={14} />
+                  <span>{successPassword}</span>
+                </div>
+              )}
 
-              <button className="profile-primary-btn" type="submit">
+              <button className="btn btn-primary" type="submit">
                 <Lock size={16} />
                 {authProvider === "google" ? "Set Password" : "Update Password"}
               </button>
@@ -387,14 +505,25 @@ export default function ProfilePage() {
           </section>
         </div>
 
-        <section className="profile-actions">
-          <button onClick={handleSaveChanges} disabled={saving || isCompressingAvatar} className="profile-save-btn">
+        {/* Action Buttons */}
+        <section className="action-buttons">
+          <button
+            onClick={handleSaveChanges}
+            disabled={saving || isCompressingAvatar}
+            className="btn btn-success"
+          >
             <Save size={18} />
-            {saving ? "Saving..." : isCompressingAvatar ? "Compressing image..." : "Save Changes"}
+            <span>
+              {saving
+                ? "Saving..."
+                : isCompressingAvatar
+                  ? "Compressing..."
+                  : "Save Changes"}
+            </span>
           </button>
-          <button onClick={handleLogoutAll} className="profile-logout-btn">
+          <button onClick={handleLogoutAll} className="btn btn-danger">
             <LogOut size={18} />
-            Logout from All Devices
+            <span>Logout from All Devices</span>
           </button>
         </section>
       </div>
