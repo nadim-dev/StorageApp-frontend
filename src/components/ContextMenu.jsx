@@ -1,6 +1,8 @@
 
+import { useState } from "react";
 import { downloadFile } from "../api/fileApi.js";
-import { FaBan, FaDownload, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaBan, FaChevronRight, FaDownload, FaPen, FaShareAlt, FaTrashAlt } from "react-icons/fa";
+import ShareOptionsMenu from "./ShareOptionsMenu.jsx";
 
 function ContextMenu({
     item,
@@ -9,11 +11,23 @@ function ContextMenu({
     handleDeleteFile,
     handleDeleteDirectory,
     openRenameModal,
+    openShareModal,
     closeMenu
   }) {
+    const [showShareOptions, setShowShareOptions] = useState(false);
 
 const menuItems = item.isDirectory
       ? [
+          ...(openShareModal
+            ? [
+                {
+                  label: "Share",
+                  icon: <FaShareAlt className="context-menu-item-icon" aria-hidden="true" />,
+                  hasSubmenu: true,
+                  onClick: () => setShowShareOptions((prev) => !prev),
+                },
+              ]
+            : []),
           {
             label: "Rename",
             icon: <FaPen className="context-menu-item-icon" aria-hidden="true" />,
@@ -39,6 +53,16 @@ const menuItems = item.isDirectory
           },
         ]
       : [
+          ...(openShareModal
+            ? [
+                {
+                  label: "Share",
+                  icon: <FaShareAlt className="context-menu-item-icon" aria-hidden="true" />,
+                  hasSubmenu: true,
+                  onClick: () => setShowShareOptions((prev) => !prev),
+                },
+              ]
+            : []),
           {
             label: "Download",
             icon: <FaDownload className="context-menu-item-icon" aria-hidden="true" />,
@@ -63,9 +87,12 @@ const menuItems = item.isDirectory
           },
         ];
 
-    function handleItemClick(action) {
-      action();
-      closeMenu?.();
+    function handleMenuItemClick(menuItem) {
+      menuItem.onClick();
+
+      if (!menuItem.hasSubmenu) {
+        closeMenu?.();
+      }
     }
 
     return (
@@ -77,13 +104,26 @@ const menuItems = item.isDirectory
           <button
             type="button"
             key={menuItem.label}
-            className={`context-menu-item ${menuItem.variant === "danger" ? "is-danger" : ""}`}
-            onClick={() => handleItemClick(menuItem.onClick)}
+            className={`context-menu-item ${menuItem.variant === "danger" ? "is-danger" : ""} ${
+              menuItem.hasSubmenu && showShareOptions ? "is-active" : ""
+            }`}
+            onClick={() => handleMenuItemClick(menuItem)}
           >
             {menuItem.icon}
             <span className="context-menu-item-label">{menuItem.label}</span>
+            {menuItem.hasSubmenu && (
+              <FaChevronRight className="context-menu-chevron" aria-hidden="true" />
+            )}
           </button>
         ))}
+
+        {showShareOptions && (
+          <ShareOptionsMenu
+            item={item}
+            onShare={openShareModal}
+            onClose={closeMenu}
+          />
+        )}
       </div>
     );
   }

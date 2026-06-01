@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FaHome, FaExclamationCircle } from "react-icons/fa";
 import CreateDirectoryModal from "./components/CreateDirectoryModal";
 import RenameModal from "./components/RenameModal";
+import ShareModal from "./components/ShareModal";
 import DirectoryList from "./components/DirectoryList";
 import DriveUILayout from "./components/DriveUILayout";
 import EmptyFolder from "./components/EmptyFolder";
@@ -92,6 +93,7 @@ function DirectoryView() {
   const [renameType, setRenameType] = useState(null); // "directory" or "file"
   const [renameId, setRenameId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
+  const [shareItem, setShareItem] = useState(null);
   //* for creating folderbreadcumbs
 
   const [folderBreadcrumbs, setFolderBreadcrumbs] = useState([]);
@@ -271,6 +273,7 @@ function DirectoryView() {
     },
     [
       currentUser.maxStorageInBytes,
+      currentUser.status,
       currentUser.usedStorage,
       dirId,
       setFilesList,
@@ -307,8 +310,10 @@ function DirectoryView() {
 
     // Take first item
     let fileId; // Declare here so it's accessible in catch block
+    let currentItem;
     try {
-      const [currentItem, ...restQueue] = uploadQueueRef.current;
+      [currentItem] = uploadQueueRef.current;
+      const restQueue = uploadQueueRef.current.slice(1);
       console.log("currentItem ..................", currentItem);
       const result = await getSignedURL({
         name: currentItem.name,
@@ -372,7 +377,9 @@ function DirectoryView() {
       console.log("error aa gya bhai");
       console.log(err.message);
       await fileUploadFail({ fileId });
-      delete uploadFileIdMapRef.current[currentItem.id];
+      if (currentItem?.id) {
+        delete uploadFileIdMapRef.current[currentItem.id];
+      }
       processUploadQueue(activeDirId);
     }
   }
@@ -521,6 +528,11 @@ function DirectoryView() {
     setRenameId(id);
     setRenameValue(currentName);
     setShowRenameModal(true);
+  }, []);
+
+  const openShareModal = useCallback((item) => {
+    setActiveContextMenu(null);
+    setShareItem(item);
   }, []);
 
   const handleRenameSubmit = useCallback(
@@ -729,6 +741,13 @@ function DirectoryView() {
         />
       )}
 
+      {shareItem && (
+        <ShareModal
+          item={shareItem}
+          onClose={() => setShareItem(null)}
+        />
+      )}
+
       {/* If folder is loading */}
       {isDirectoryLoading ? (
         <p className="no-data-message">Loading folder...</p>
@@ -749,11 +768,12 @@ function DirectoryView() {
           progressMap={progressMap}
           handleCancelUpload={handleCancelUpload}
           openRenameModal={openRenameModal}
+          openShareModal={openShareModal}
           closeMenu={closeMenu}
         />
       )}
 
-      {!showCreateDirModal && !showRenameModal && !showDriveModal && (
+      {!showCreateDirModal && !showRenameModal && !showDriveModal && !shareItem && (
         <DriveBtn
           onCreateFolder={openCreateFolderModal}
           onUploadFiles={openUploadFilePicker}

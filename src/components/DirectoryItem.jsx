@@ -19,6 +19,7 @@ function DirectoryItem({
   uploadProgress,
   handleCancelUpload,
   openRenameModal,
+  openShareModal,
   closeMenu
 }) {
   const itemId = item.id || item._id;
@@ -121,6 +122,7 @@ function DirectoryItem({
                   handleDeleteDirectory={handleDeleteDirectory}
                   handleCancelUpload={handleCancelUpload}
                   openRenameModal={openRenameModal}
+                  openShareModal={openShareModal}
                   closeMenu={closeMenu}
                />
              )}

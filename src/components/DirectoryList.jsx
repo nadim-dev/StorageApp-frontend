@@ -12,6 +12,7 @@ function DirectoryList({
   handleDeleteFile,
   handleCancelUpload,
   openRenameModal,
+  openShareModal,
   closeMenu,
 }) {
   const folders = items.filter((item) => item.isDirectory);
@@ -46,6 +47,7 @@ function DirectoryList({
                   handleDeleteFile={handleDeleteFile}
                   handleDeleteDirectory={handleDeleteDirectory}
                   openRenameModal={openRenameModal}
+                  openShareModal={openShareModal}
                   closeMenu={closeMenu}
                 />
               );
@@ -80,6 +82,7 @@ function DirectoryList({
                   handleDeleteDirectory={handleDeleteDirectory}
                   handleCancelUpload={handleCancelUpload}
                   openRenameModal={openRenameModal}
+                  openShareModal={openShareModal}
                   closeMenu={closeMenu}
                 />
               );
