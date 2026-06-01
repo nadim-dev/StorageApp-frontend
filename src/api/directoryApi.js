@@ -7,7 +7,7 @@ export const temporaryDeleteFolder=async (dirId)=>axiosWithCreds.delete(`/direct
 
 
 //* rename api directory
-export const renameDirectory=async (renameId,renameValue)=>axiosWithCreds.patch(`/directory/${renameId}`,{name:renameValue});
+export const  renameDirectory=async (renameId,renameValue)=>axiosWithCreds.patch(`/directory/${renameId}`,{name:renameValue});
 
 //* make director starred
 export const starredDirectory=async (id,payload)=>axiosWithCreds.patch(`/directory/starred/${id}`,payload);
