@@ -12,6 +12,7 @@ function ContextMenu({
     handleDeleteDirectory,
     openRenameModal,
     openShareModal,
+    onPublicLinkCopied,
     closeMenu
   }) {
     const [showShareOptions, setShowShareOptions] = useState(false);
@@ -122,6 +123,7 @@ const menuItems = item.isDirectory
             item={item}
             onShare={openShareModal}
             onClose={closeMenu}
+            onLinkCopied={onPublicLinkCopied}
           />
         )}
       </div>

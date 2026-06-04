@@ -2,7 +2,28 @@ import { useState } from "react";
 import { FaLink, FaUserPlus } from "react-icons/fa";
 import { createPublicLink } from "../api/shareApi";
 
-function ShareOptionsMenu({ item, onShare, onClose }) {
+function getPublicLinkFromResponse(response) {
+  return response?.publicUrl || "";
+}
+
+async function copyToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+}
+
+function ShareOptionsMenu({ item, onShare, onClose, onLinkCopied }) {
   const [isCreatingPublicLink, setIsCreatingPublicLink] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,10 +35,18 @@ function ShareOptionsMenu({ item, onShare, onClose }) {
     setError("");
 
     try {
-      await createPublicLink({
+      const response = await createPublicLink({
         resourceId,
         resourceType: item.isDirectory ? "directory" : "file",
       });
+      const publicLink = getPublicLinkFromResponse(response);
+
+      if (!publicLink) {
+        throw new Error("Public link created, but no link was returned");
+      }
+
+      await copyToClipboard(publicLink);
+      onLinkCopied?.(publicLink);
       setIsCreatingPublicLink(false);
       onClose?.();
     } catch (err) {

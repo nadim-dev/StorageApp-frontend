@@ -13,6 +13,7 @@ function DirectoryList({
   handleCancelUpload,
   openRenameModal,
   openShareModal,
+  onPublicLinkCopied,
   closeMenu,
 }) {
   const folders = items.filter((item) => item.isDirectory);
@@ -48,6 +49,7 @@ function DirectoryList({
                   handleDeleteDirectory={handleDeleteDirectory}
                   openRenameModal={openRenameModal}
                   openShareModal={openShareModal}
+                  onPublicLinkCopied={onPublicLinkCopied}
                   closeMenu={closeMenu}
                 />
               );
@@ -83,6 +85,7 @@ function DirectoryList({
                   handleCancelUpload={handleCancelUpload}
                   openRenameModal={openRenameModal}
                   openShareModal={openShareModal}
+                  onPublicLinkCopied={onPublicLinkCopied}
                   closeMenu={closeMenu}
                 />
               );

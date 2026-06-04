@@ -20,6 +20,7 @@ function DirectoryItem({
   handleCancelUpload,
   openRenameModal,
   openShareModal,
+  onPublicLinkCopied,
   closeMenu
 }) {
   const itemId = item.id || item._id;
@@ -123,6 +124,7 @@ function DirectoryItem({
                   handleCancelUpload={handleCancelUpload}
                   openRenameModal={openRenameModal}
                   openShareModal={openShareModal}
+                  onPublicLinkCopied={onPublicLinkCopied}
                   closeMenu={closeMenu}
                />
              )}

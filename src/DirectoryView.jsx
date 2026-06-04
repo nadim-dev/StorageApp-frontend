@@ -4,6 +4,7 @@ import { FaHome, FaExclamationCircle } from "react-icons/fa";
 import CreateDirectoryModal from "./components/CreateDirectoryModal";
 import RenameModal from "./components/RenameModal";
 import ShareModal from "./components/ShareModal";
+import Toast from "./components/Toast";
 import DirectoryList from "./components/DirectoryList";
 import DriveUILayout from "./components/DriveUILayout";
 import EmptyFolder from "./components/EmptyFolder";
@@ -21,6 +22,7 @@ import { renameDirectory, temporaryDeleteFolder } from "./api/directoryApi.js";
 import { DriveBtn } from "./components/MobileDriveButton.jsx";
 import { useAuth } from "./context/authContext.jsx";
 import { getSignedURL } from "./api/fileApi.js";
+import useToast from "./hooks/useToast.js";
 
 const BASE_URL = "http://localhost:4000";
 const HTTP_HEADER_SAFE_VALUE = /^[\t\x20-\x7e\x80-\xff]*$/;
@@ -71,6 +73,7 @@ function ErrorBanner({ title = "Error", message, onClose }) {
 
 function DirectoryView() {
   const { currentUser, authLoading } = useAuth();
+  const { toast, showToast, hideToast } = useToast();
   const { dirId } = useParams();
   const navigate = useNavigate();
   const {
@@ -535,6 +538,13 @@ function DirectoryView() {
     setShareItem(item);
   }, []);
 
+  const handlePublicLinkCopied = useCallback(() => {
+    showToast("Public link copied to clipboard", {
+      title: "Link copied",
+      type: "success",
+    });
+  }, [showToast]);
+
   const handleRenameSubmit = useCallback(
     async (e) => {
       console.log("rename function is running");
@@ -769,9 +779,12 @@ function DirectoryView() {
           handleCancelUpload={handleCancelUpload}
           openRenameModal={openRenameModal}
           openShareModal={openShareModal}
+          onPublicLinkCopied={handlePublicLinkCopied}
           closeMenu={closeMenu}
         />
       )}
+
+      <Toast toast={toast} onClose={hideToast} />
 
       {!showCreateDirModal && !showRenameModal && !showDriveModal && !shareItem && (
         <DriveBtn

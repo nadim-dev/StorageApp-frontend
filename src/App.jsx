@@ -23,6 +23,7 @@ import { showConsoleWarning } from "./utils/consoleWarning.js";
 import { useEffect } from "react";
 import { SubcriptionPage } from "./pages/SubcriptionPage.jsx";
 import ManagePlan from "./pages/ManagePlan";
+import SharedResource from "./pages/SharedResource.jsx";
 
 function ProtectedLayout() {
   useEffect(() => {
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
       {
         path:"/plan",
         element:<SubcriptionPage/>,
+      },
+      {
+        path:"/share/:resourceType/:token",
+        element:<SharedResource />
       },
 
   {
