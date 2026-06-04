@@ -57,3 +57,7 @@ export const renameUserResources = async (userId, type, fileId, renameValue) =>
 // Get nested resources in a folder
 export const getNestedResources = async (folderId) =>
   axiosWithCreds.get(`/user/${folderId}/nested-resources/`);
+
+//* search user functionality
+export const searchUser= async (query) =>
+  axiosWithCreds.get(`/user/search?q=${query}`);

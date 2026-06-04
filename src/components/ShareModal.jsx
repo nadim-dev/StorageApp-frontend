@@ -1,14 +1,158 @@
-import { useEffect, useMemo } from "react";
+import { searchUser } from "@/api/userApi";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { FaLock, FaTimes, FaUserPlus } from "react-icons/fa";
+import { FaEye, FaPen, FaSearch, FaTimes, FaUserFriends, FaUserPlus } from "react-icons/fa";
+import { IoShareSocialOutline } from "react-icons/io5";
+
+function getInitials(value) {
+  const [name = ""] = String(value).split("@");
+  return name
+    .split(/[.\s_-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "U";
+}
+
+
+function normalizeUser(user) {
+  const email = user?.email || "";
+  const name = user?.name ||  "User";
+
+  return {
+    id: user?._id ,
+    name,
+    email,
+    picture: user?.picture || user?.profilePicture || user?.avatar || "",
+    initials: getInitials(name || email),
+  };
+}
 
 function ShareModal({ item, onClose }) {
   const resourceType = item?.isDirectory ? "directory" : "file";
+  const [query, setQuery] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [permission, setPermission] = useState("viewer");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   const title = useMemo(() => {
-    if (!item?.name) return "Share";
-    return `Share "${item.name}"`;
-  }, [item?.name]);
+    return `Share ${resourceType === "directory" ? "Folder" : "File"}`;
+  }, [resourceType]);
+
+
+  //* debounce search
+  useEffect(() => {
+    const trimmed = query.trim();
+
+    if (trimmed.length < 2) {
+      setSearchResults([]);
+      setSearchError("");
+      setIsSearching(false);
+      return undefined;
+    }
+
+    let ignore = false;
+    const timer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        setSearchError("");
+        const {users}= await searchUser(trimmed);
+
+        if (!ignore) {
+          setSearchResults(Array.isArray(users) ? users.map(normalizeUser) : []);
+        }
+      } catch (error) {
+        if (!ignore) {
+          console.error(error);
+          setSearchResults([]);
+          setSearchError("Unable to search users");
+        }
+      } finally {
+        if (!ignore) {
+          setIsSearching(false);
+        }
+      }
+    }, 400);
+
+    return () => {
+      ignore = true;
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  const canAddQuery = useMemo(() => {
+    return query.trim().length > 0;
+  }, [query]);
+
+  const visibleSearchResults = useMemo(() => {
+    const selectedIds = new Set(selectedUsers.map((user) => user.id));
+    const selectedEmails = new Set(
+      selectedUsers.map((user) => user.email.toLowerCase()),
+    );
+
+    return searchResults.filter((user) => {
+      if (selectedIds.has(user.id)) return false;
+      return !selectedEmails.has(user.email.toLowerCase());
+    });
+  }, [searchResults, selectedUsers]);
+
+  const selectedCount = selectedUsers.length;
+
+  function handleAddUser(e) {
+    e?.preventDefault();
+    const value = query.trim();
+    if (!value) return;
+
+    const matchedUser = visibleSearchResults.find(
+      (user) => user.email.toLowerCase() === value.toLowerCase(),
+    );
+
+    if (matchedUser) {
+      addSelectedUser(matchedUser);
+      return;
+    }
+
+    addSelectedUser(normalizeUser({ email: value, name: value }));
+  }
+
+  function addSelectedUser(user) {
+    setSelectedUsers((prev) => {
+      const alreadySelected = prev.some(
+        (selectedUser) =>
+          selectedUser.id === user.id ||
+          selectedUser.email.toLowerCase() === user.email.toLowerCase(),
+      );
+      if (alreadySelected) return prev;
+
+      return [...prev, user];
+    });
+
+    setQuery("");
+    setSearchResults([]);
+  }
+
+  function removeSelectedUser(userId) {
+    setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
+  }
+
+  const permissionOptions = useMemo(() => {
+    return [
+      {
+        id: "viewer",
+        title: "Viewer",
+        description: "Read-only access",
+        icon: <FaEye />,
+      },
+      {
+        id: "editor",
+        title: "Editor",
+        description: "Can edit file",
+        icon: <FaPen />,
+      },
+    ];
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -33,11 +177,11 @@ function ShareModal({ item, onClose }) {
         <div className="share-modal-header">
           <div className="share-modal-title-wrap">
             <span className="share-modal-icon" aria-hidden="true">
-              <FaUserPlus />
+              <FaUserFriends />
             </span>
             <div>
               <h2 id="share-modal-title">{title}</h2>
-              <p>{resourceType === "directory" ? "Folder" : "File"} sharing</p>
+              <p>Invite users and set permissions</p>
             </div>
           </div>
           <button
@@ -50,32 +194,126 @@ function ShareModal({ item, onClose }) {
           </button>
         </div>
 
-        <div className="share-modal-section">
-          <label className="share-modal-label" htmlFor="share-email-input">
-            Share
-          </label>
-          <div className="share-email-row">
+        {item?.name && <p className="share-item-name">{item.name}</p>}
+
+        <form className="share-search-form" onSubmit={handleAddUser}>
+          <label className="share-search-wrap" htmlFor="share-email-input">
+            <FaSearch className="share-search-icon" aria-hidden="true" />
             <input
               id="share-email-input"
-              className="share-email-input"
-              type="email"
-              placeholder="Add people by email"
+              className="share-search-input"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search users or type email..."
             />
-            <button type="button" className="secondary-button">
-              Invite
+            <button
+              type="submit"
+              className="share-add-user-button"
+              disabled={!canAddQuery}
+              aria-label="Add user"
+            >
+              <FaUserPlus aria-hidden="true" />
             </button>
-          </div>
+          </label>
+        </form>
+
+        <div className="share-selected-panel">
+          <h3>Selected ({selectedCount})</h3>
+
+          {query.trim().length >= 2 && (
+            <div className="share-search-results">
+              {isSearching ? (
+                <p className="share-search-status">Searching users...</p>
+              ) : searchError ? (
+                <p className="share-search-status is-error">{searchError}</p>
+              ) : visibleSearchResults.length > 0 ? (
+                visibleSearchResults.map((user) => (
+                  <button
+                    type="button"
+                    className="share-user-result"
+                    key={user.id}
+                    onClick={() => addSelectedUser(user)}
+                  >
+                    {user.picture ? (
+                      <img src={user.picture} alt="" />
+                    ) : (
+                      <span className="share-user-avatar">{user.initials}</span>
+                    )}
+                    <span className="share-user-copy">
+                      <strong>{user.name}</strong>
+                      <span>{user.email}</span>
+                    </span>
+                    <FaUserPlus aria-hidden="true" />
+                  </button>
+                ))
+              ) : (
+                <p className="share-search-status">No users found</p>
+              )}
+            </div>
+          )}
+
+          {selectedUsers.length === 0 && query.trim().length < 2 ? (
+            <div className="share-empty-state">
+              <FaUserFriends aria-hidden="true" />
+              <p>No users selected yet.</p>
+              <span>Search above to add people.</span>
+            </div>
+          ) : (
+            <div className="share-selected-list">
+              {selectedUsers.map((user) => (
+                <div className="share-selected-user" key={user.id}>
+                  {user.picture ? (
+                    <img
+                      className="share-selected-avatar"
+                      src={user.picture}
+                      alt=""
+                    />
+                  ) : (
+                    <span className="share-selected-avatar">{user.initials}</span>
+                  )}
+                  <span className="share-selected-copy">
+                    <strong>{user.name}</strong>
+                    <span>{user.email}</span>
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${user.email}`}
+                    onClick={() => removeSelectedUser(user.id)}
+                  >
+                    <FaTimes aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="share-modal-section share-access-section">
-          <div className="share-public-copy">
-            <span className="share-public-icon" aria-hidden="true">
-              <FaLock />
-            </span>
-            <div>
-              <h3>General access</h3>
-              <p>Only people added here can access this item.</p>
-            </div>
+        <div className="share-permission-panel">
+          <h3>Permission</h3>
+          <div className="share-permission-grid">
+            {permissionOptions.map((option) => (
+              <button
+                type="button"
+                key={option.id}
+                className={`share-permission-card ${
+                  permission === option.id ? "is-selected" : ""
+                }`}
+                onClick={() => setPermission(option.id)}
+              >
+                <span className="share-permission-icon" aria-hidden="true">
+                  {option.icon}
+                </span>
+                <span className="share-permission-copy">
+                  <strong>{option.title}</strong>
+                  <span>{option.description}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="share-count-strip">
+            Sharing with <strong>{selectedCount}</strong> users
           </div>
         </div>
 
@@ -83,8 +321,14 @@ function ShareModal({ item, onClose }) {
           <button type="button" className="secondary-button" onClick={onClose}>
             Cancel
           </button>
-          <button type="button" className="primary-button" onClick={onClose}>
-            Done
+          <button
+            type="button"
+            className="primary-button share-submit-button"
+            disabled={selectedCount === 0}
+            onClick={onClose}
+          >
+            <IoShareSocialOutline aria-hidden="true" />
+            Share {resourceType === "directory" ? "Folder" : "File"}
           </button>
         </div>
       </div>
