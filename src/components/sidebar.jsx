@@ -8,6 +8,7 @@ import {
   FaRocket,
   FaCheckCircle,
   FaCrown,
+  FaUserFriends
 } from "react-icons/fa";
 import Logo from "../assets/cloudnest-logo.svg";
 import { formatFileSize } from "../utils/formatFile";
@@ -19,6 +20,7 @@ const navItems = [
   { key: "recent", label: "Recent", icon: FaClock, to: "/recent" },
   { key: "starred", label: "Starred", icon: FaStar, to: "/starred" },
   { key: "trash", label: "Trash", icon: FaTrashAlt, to: "/trash" },
+  {key: "shared-with-me",label: "Shared with Me",icon: FaUserFriends,to: "/shared-with-me"}
 ];
 
 function Sidebar({
@@ -73,9 +75,6 @@ function Sidebar({
         <button
           type="button"
           className="sidebar-brand"
-          onClick={() => {
-            navigateSmoothly("/");
-          }}
         >
           <img src={Logo} alt="CloudNest logo" className="sidebar-logo" />
           <div>

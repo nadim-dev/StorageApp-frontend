@@ -3,6 +3,11 @@ import { axiosWithCreds } from "./axiosInstances";
 export const createPublicLink= async ({ resourceId, resourceType }) =>
   axiosWithCreds.post("/share/public-link", { resourceId, resourceType });
 
+
+export const shareResource = async ({resourceId,resourceType,sharedWith,permission}) =>
+  axiosWithCreds.post("/share/resources", {resourceId,resourceType,sharedWith,permission});
+
+
 export const fetchShareResources=async(resourceType,token)=>
   axiosWithCreds.get(`share/${resourceType}/${token}`)
 
@@ -23,3 +28,19 @@ export const downloadSharedDirectoryFile=async (token,fileId)=>
 export const viewSharedDirectory=async (token,dirId)=>
   axiosWithCreds.get(`/share/directory/${token}/directory/${dirId}`)
 
+//* shared-with-me page api endpoint
+
+export const getFilesSharedWithMe=async ()=>
+  axiosWithCreds.get("/share/shared-with-me")
+
+export const viewSharedFile=(fileId)=>
+  axiosWithCreds.get(`/share/shared-with-me/file/${fileId}`)
+
+export const downloadSharedWithMeFile=(fileId)=>
+  axiosWithCreds.get(`/share/shared-with-me/file/${fileId}?action=download`)
+
+export const renameSharedWithMeResource=({renameId,renameType,renameValue})=>
+  axiosWithCreds.patch(`/share/shared-with-me/resource/${renameId}/rename`, { renameValue,renameType})
+
+export const viewShareWithMedDirectory=(directoryId)=>
+  axiosWithCreds.get(`/share/shared-with-me/directory/${directoryId}`)

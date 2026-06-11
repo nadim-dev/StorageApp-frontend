@@ -15,7 +15,8 @@ function ContextMenu({
     onPublicLinkCopied,
     closeMenu
   }) {
-    const [showShareOptions, setShowShareOptions] = useState(false);
+    
+const [showShareOptions, setShowShareOptions] = useState(false);
 
 const menuItems = item.isDirectory
       ? [

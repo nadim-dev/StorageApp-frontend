@@ -1,3 +1,4 @@
+import { shareResource } from "@/api/shareApi";
 import { searchUser } from "@/api/userApi";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -16,14 +17,14 @@ function getInitials(value) {
 
 
 function normalizeUser(user) {
-  const email = user?.email || "";
-  const name = user?.name ||  "User";
-
+  const name = user.name || "User";
+  const email = user.email || "";
+  
   return {
-    id: user?._id ,
+    id: user._id || email,
     name,
     email,
-    picture: user?.picture || user?.profilePicture || user?.avatar || "",
+    picture: user.picture || "",
     initials: getInitials(name || email),
   };
 }
@@ -36,6 +37,8 @@ function ShareModal({ item, onClose }) {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareError, setShareError] = useState("");
 
   const title = useMemo(() => {
     return `Share ${resourceType === "directory" ? "Folder" : "File"}`;
@@ -113,8 +116,8 @@ function ShareModal({ item, onClose }) {
       addSelectedUser(matchedUser);
       return;
     }
-
-    addSelectedUser(normalizeUser({ email: value, name: value }));
+ 
+    setSearchError("Select a user from the search results");
   }
 
   function addSelectedUser(user) {
@@ -128,13 +131,35 @@ function ShareModal({ item, onClose }) {
 
       return [...prev, user];
     });
-
-    setQuery("");
-    setSearchResults([]);
   }
 
   function removeSelectedUser(userId) {
     setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
+  }
+
+  async function handleShare() {
+    const resourceId = item?._id;
+    if (!resourceId || selectedUsers.length === 0) return;
+
+    try {
+      setIsSharing(true);
+      setShareError("");
+
+      await shareResource({
+       resourceId,
+       resourceType,
+       sharedWith: selectedUsers.map(user => user.id),
+       permission
+      });
+
+      
+      onClose();
+    } catch (error) {
+      console.error(error);
+      setShareError(error.message || "Unable to share resource");
+    } finally {
+      setIsSharing(false);
+    }
   }
 
   const permissionOptions = useMemo(() => {
@@ -317,6 +342,8 @@ function ShareModal({ item, onClose }) {
           </div>
         </div>
 
+        {shareError && <p className="share-modal-error">{shareError}</p>}
+
         <div className="share-modal-actions">
           <button type="button" className="secondary-button" onClick={onClose}>
             Cancel
@@ -324,11 +351,13 @@ function ShareModal({ item, onClose }) {
           <button
             type="button"
             className="primary-button share-submit-button"
-            disabled={selectedCount === 0}
-            onClick={onClose}
+            disabled={selectedCount === 0 || isSharing || !item?._id}
+            onClick={handleShare}
           >
             <IoShareSocialOutline aria-hidden="true" />
-            Share {resourceType === "directory" ? "Folder" : "File"}
+            {isSharing
+              ? "Sharing..."
+              : `Share ${resourceType === "directory" ? "Folder" : "File"}`}
           </button>
         </div>
       </div>

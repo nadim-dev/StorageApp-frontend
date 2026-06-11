@@ -12,6 +12,9 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import ContextMenu from "../components/ContextMenu";
 import RenameModal from "../components/RenameModal";
 import useCloseContextMenu from "../hooks/useCloseContextMenu.js";
+import useToast from "@/hooks/useToast.js";
+import Toast from "@/components/Toast";
+import ShareModal from "@/components/ShareModal";
 
 export default function RecentPage() {
    
@@ -24,6 +27,8 @@ export default function RecentPage() {
    const [renameId, setRenameId] = useState(null);
    const [renameValue, setRenameValue] = useState("");
    const [query,setQuery]=useState("");
+   const { toast, showToast, hideToast } = useToast();
+   const [shareItem, setShareItem] = useState(null);
 
    const fetchRecentFiles=useCallback(async ()=>{
         console.log("recent page function is running");
@@ -70,6 +75,18 @@ export default function RecentPage() {
     setRenameId(null);
     setRenameValue("");
   } 
+
+  const openShareModal = useCallback((item) => {
+    setActiveContextMenu(null);
+    setShareItem(item);
+  }, []);
+
+  const handlePublicLinkCopied = useCallback(() => {
+    showToast("Public link copied to clipboard", {
+      title: "Link copied",
+      type: "success",
+    });
+  }, [showToast]);
 
 
   const deleteRecentFile=async(fileId)=>{
@@ -166,6 +183,8 @@ export default function RecentPage() {
                     closeMenu={() => setActiveContextMenu(null)}
                     openRenameModal={openRenameModal}
                     handleDeleteFile={deleteRecentFile}
+                    openShareModal={openShareModal}
+                    onPublicLinkCopied={handlePublicLinkCopied}
                   />
                 ) : ""}
               </div>
@@ -181,8 +200,20 @@ export default function RecentPage() {
             setRenameValue={setRenameValue}
             onClose={() => setShowRenameModal(false)}
             onRenameSubmit={handleRenameSubmit}
+            openShareModal={openShareModal}
+            onPublicLinkCopied={handlePublicLinkCopied}
           />
         )}
+
+        {shareItem && (
+        <ShareModal
+          item={shareItem}
+          onClose={() => setShareItem(null)}
+        />
+      )}
+
+        <Toast toast={toast} onClose={hideToast} />
+
       </section>
     </DriveUILayout>
   );

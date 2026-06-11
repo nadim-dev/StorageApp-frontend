@@ -60,4 +60,4 @@ export const getNestedResources = async (folderId) =>
 
 //* search user functionality
 export const searchUser= async (query) =>
-  axiosWithCreds.get(`/user/search?q=${query}`);
+  axiosWithCreds.get(`/user/search?q=${encodeURIComponent(query)}`);
