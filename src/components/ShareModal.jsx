@@ -4,17 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaEye, FaPen, FaSearch, FaTimes, FaUserFriends, FaUserPlus } from "react-icons/fa";
 import { IoShareSocialOutline } from "react-icons/io5";
-
-function getInitials(value) {
-  const [name = ""] = String(value).split("@");
-  return name
-    .split(/[.\s_-]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "U";
-}
-
+import { getInitial } from "@/utils/getInitial";
 
 function normalizeUser(user) {
   const name = user.name || "User";
@@ -25,7 +15,7 @@ function normalizeUser(user) {
     name,
     email,
     picture: user.picture || "",
-    initials: getInitials(name || email),
+    initials: getInitial(name || email),
   };
 }
 

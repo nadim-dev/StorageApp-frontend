@@ -4,18 +4,10 @@ import DriveUILayout from "@/components/DriveUILayout.jsx";
 import { renderFileIcon } from "@/components/common/getFileIcon.jsx";
 import {downloadSharedWithMeFile,getFilesSharedWithMe,renameSharedWithMeResource,viewSharedFile,viewShareWithMedDirectory} from "@/api/shareApi";
 import { formatDate, formatShortDate } from "@/utils/formatDate";
+import { getInitial } from "@/utils/getInitial";
 import RenameModal from "@/components/RenameModal.jsx";
 import "../DirectoryView.css";
 
-
-function getInitials(name = "") {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "U";
-}
 
 function formatResourceType(type = "") {
   if (!type) return "Resource";
@@ -351,7 +343,7 @@ export const SharedWithMe = () => {
                       <>
                         <div className="shared-owner-cell">
                           <span className="shared-owner-avatar">
-                            {getInitials(owner.name)}
+                            {getInitial(owner.name)}
                           </span>
                           <div>
                             <strong>{owner.name || "Unknown user"}</strong>

@@ -4,6 +4,7 @@ import {FaFolderPlus,FaCreditCard,FaTachometerAlt,FaGoogleDrive,FaUpload,FaUser,
 import GoogleDriveModal from "./GoogleDriveModal"
 import { logoutUser } from "../api/userApi.js";
 import { useAuth } from "../context/authContext.jsx";
+import { getInitial } from "../utils/getInitial.js";
 
 
 function DirectoryHeader({
@@ -161,14 +162,17 @@ function DirectoryHeader({
         {/* User Icon & Dropdown Menu */}
         <div className="user-menu-container" ref={userMenuRef}>
         <button className="icon-button" onClick={handleUserIconClick}>
-        <img
-          className="user-picture"
-          src={user.picture ? user.picture : user.googlePicture}
-          onError={(e) => {
-            e.currentTarget.src = "/default_avatar.png";
-          }}
-          alt={user.name || "User picture"}
-       />
+        {user?.picture ? (
+          <img
+            className="user-picture"
+            src={user.picture}
+            alt={user.name || "User picture"}
+          />
+        ) : (
+          <span className="user-picture user-initials">
+            {getInitial(user?.name)}
+          </span>
+        )}
 
       </button> 
 

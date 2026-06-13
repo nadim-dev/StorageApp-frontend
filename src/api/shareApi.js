@@ -44,3 +44,19 @@ export const renameSharedWithMeResource=({renameId,renameType,renameValue})=>
 
 export const viewShareWithMedDirectory=(directoryId)=>
   axiosWithCreds.get(`/share/shared-with-me/directory/${directoryId}`)
+
+//* shared by me page endpoint
+export const sharedByMeResources=()=>
+  axiosWithCreds.get("/share/shared-by-me")
+
+export const stopSharingResource=(resourceId)=>
+  axiosWithCreds.delete(`/share/shared-by-me/resource/${resourceId}`) 
+
+export const getResourceAccess = (resourceId) =>
+  axiosWithCreds.get(`/share/shared-by-me/resource/${resourceId}/access`);
+
+export const updateResourceAccess = ({ resourceId, removeAccessIds, permissionUpdates }) =>
+  axiosWithCreds.patch(`/share/shared-by-me/resource/${resourceId}/access`, {
+    removeAccessIds,
+    permissionUpdates,
+  });

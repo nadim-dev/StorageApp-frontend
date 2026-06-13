@@ -25,6 +25,7 @@ import { SubcriptionPage } from "./pages/SubcriptionPage.jsx";
 import ManagePlan from "./pages/ManagePlan";
 import SharedResource from "./pages/SharedResource.jsx";
 import { SharedWithMe } from "./pages/ShareWithMe.jsx";
+import { ShareByMe} from "./pages/ShareByMe.jsx";
 
 function ProtectedLayout() {
   useEffect(() => {
@@ -91,7 +92,11 @@ const router = createBrowserRouter([
       {
          path:"/shared-with-me",
         element:<SharedWithMe/>
-      }
+      },
+      {
+        path:"/shared-by-me",
+        element:<ShareByMe />
+      },
       
     ],
   },
