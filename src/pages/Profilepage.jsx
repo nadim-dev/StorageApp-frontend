@@ -1,19 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Camera,
-  User,
-  Mail,
-  Briefcase,
-  Lock,
-  Eye,
-  EyeOff,
-  LogOut,
-  Save,
-  Shield,
-  Clock,
-  Zap,
-  CheckCircle,
-} from "lucide-react";
+import {Camera,User,Mail,Briefcase,Lock,Eye,EyeOff,LogOut,Save,Shield,Clock,Zap,CheckCircle,} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
 import "../ProfilePage.css";
@@ -274,7 +260,10 @@ export default function ProfilePage() {
 
             <div className="user-info">
               <h1 className="user-name">{originalProfile.name || "Welcome"}</h1>
-              <p className="user-email">{profile.email || "No email"}</p>
+              <p className="user-email">
+                <Mail size={14} />
+                <span>{profile.email || "No email"}</span>
+              </p>
               <div className="user-badges">
                 <span className="badge badge-role">
                   <Briefcase size={13} />
@@ -282,7 +271,7 @@ export default function ProfilePage() {
                 </span>
                 <span className="badge badge-status">
                   <CheckCircle size={13} />
-                  Active
+                  Logged in
                 </span>
               </div>
             </div>
