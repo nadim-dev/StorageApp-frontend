@@ -61,3 +61,16 @@ export const getNestedResources = async (folderId) =>
 //* search user functionality
 export const searchUser= async (query) =>
   axiosWithCreds.get(`/user/search?q=${encodeURIComponent(query)}`);
+
+//* user dashboard breakdown
+export const storageBreakDown=async ()=>
+  axiosWithCreds.get("user/dashboard/storage-breakdown")
+
+//* calculating user storage health
+
+export const storageHealthCalculator=async ()=>
+  axiosWithCreds.get("user/dashboard/storage-health")
+
+//* showing recommendation to users
+export const showRecommendation=async ()=>
+  axiosWithCreds.get("/user/storage/recommendations")

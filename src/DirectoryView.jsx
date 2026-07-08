@@ -9,13 +9,7 @@ import DirectoryList from "./components/DirectoryList";
 import DriveUILayout from "./components/DriveUILayout";
 import EmptyFolder from "./components/EmptyFolder";
 import { useDrive } from "./context/driveContext";
-import {
-  renameFile,
-  temporaryDeleteFile,
-  viewFile,
-  markUploadComplete,
-  fileUploadFail,
-} from "./api/fileApi.js";
+import {renameFile,temporaryDeleteFile,viewFile,markUploadComplete,fileUploadFail} from "./api/fileApi.js";
 import "../src/DirectoryView.css";
 import useCloseContextMenu from "./hooks/useCloseContextMenu.js";
 import { renameDirectory, temporaryDeleteFolder } from "./api/directoryApi.js";
@@ -23,6 +17,7 @@ import { DriveBtn } from "./components/MobileDriveButton.jsx";
 import { useAuth } from "./context/authContext.jsx";
 import { getSignedURL } from "./api/fileApi.js";
 import useToast from "./hooks/useToast.js";
+import { calculateSHA256 } from "./utils/calculateHash.js";
 
 const BASE_URL = "http://localhost:4000";
 const HTTP_HEADER_SAFE_VALUE = /^[\t\x20-\x7e\x80-\xff]*$/;
@@ -205,7 +200,7 @@ function DirectoryView() {
   //* Select multiple files to upload
 
   const handleFileSelect = useCallback(
-    (e) => {
+    (e) => {  
       console.log("select file function is running");
       const selectedFiles = Array.from(e.target.files);
       console.log("selectedFiles", selectedFiles);
@@ -283,6 +278,8 @@ function DirectoryView() {
     ],
   );
 
+ 
+
   function enqueueUploadItems(items, activeDirId = dirId) {
     uploadQueueRef.current = [...uploadQueueRef.current, ...items];
     setUploadQueue(uploadQueueRef.current);
@@ -317,13 +314,15 @@ function DirectoryView() {
     try {
       [currentItem] = uploadQueueRef.current;
       const restQueue = uploadQueueRef.current.slice(1);
-      console.log("currentItem ..................", currentItem);
+      const hash = await calculateSHA256(currentItem.file);
       const result = await getSignedURL({
         name: currentItem.name,
         contentType: currentItem.contentType || currentItem.file.type,
         size: currentItem.size,
+        hash,
         parentDirId: dirId || "",
       });
+
       fileId = result.fileId;
       const uploadUrl = result.uploadUrl;
       console.log(uploadUrl);
@@ -373,7 +372,7 @@ function DirectoryView() {
         processUploadQueue(activeDirId);
       });
 
-      // If user cancels, we also remove from the queue
+      //* If user cancels, we also remove from the queue
       setUploadXhrMap((prev) => ({ ...prev, [currentItem.id]: xhr }));
       xhr.send(currentItem.file);
     } catch (err) {

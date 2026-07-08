@@ -7,7 +7,8 @@ import {
   FaDatabase,
   FaPlus,
   FaUserFriends,
-  FaShareAlt
+  FaShareAlt,
+  FaMagic
 } from "react-icons/fa";
 import Logo from "../assets/cloudnest-logo.svg";
 import { formatFileSize } from "../utils/formatFile";
@@ -18,8 +19,10 @@ const navItems = [
   { key: "recent", label: "Recent", icon: FaClock, to: "/recent" },
   { key: "starred", label: "Starred", icon: FaStar, to: "/starred" },
   { key: "trash", label: "Trash", icon: FaTrashAlt, to: "/trash" },
+  {key:"storage-intelligence",label:"Storage Intelligence",icon:FaMagic,to:"/storage-intelligence"},
   {key: "shared-with-me",label: "Shared with Me",icon: FaUserFriends,to: "/shared-with-me"},
   {key: "shared-by-me",label: "Shared by Me",icon: FaShareAlt,to: "/shared-by-me"}
+
 ];
 
 function Sidebar({
@@ -29,10 +32,9 @@ function Sidebar({
 }) {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const totalBytes = currentUser.maxStorageInBytes || 1 * 1024 ** 4;
+  const totalBytes = currentUser.maxStorageInBytes;
   const usedBytes = currentUser.usedStorage;
   const usagePercent = Math.min(100, (usedBytes / totalBytes) * 100);
-  const totalStorageTB = (totalBytes / 1024 ** 4).toFixed(2);
 
   function navigateSmoothly(to) {
     if (!to) return;
@@ -109,7 +111,7 @@ function Sidebar({
           />
         </div>
         <p className="storage-used">
-          {formatFileSize(usedBytes)} of {totalStorageTB} TB used
+          {formatFileSize(usedBytes)} of {formatFileSize(totalBytes)} used
         </p>
 
         <button
@@ -117,7 +119,7 @@ function Sidebar({
           className="storage-more-button"
           onClick={() => {
             navigateSmoothly("/plan");
-          }}
+          }}  
         >
           <FaPlus />
           <span>More storage</span>

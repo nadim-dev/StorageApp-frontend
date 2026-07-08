@@ -30,4 +30,17 @@ export const getSignedURL=async (data)=>axiosWithCreds.post("/file/uploads/initi
 
 export const markUploadComplete=async(payload)=>axiosWithCreds.post("/file/uploads/complete",payload)
 
-export const fileUploadFail=async(payload)=>axiosWithCreds.post("/file/uploads/failed",payload)
+export const fileUploadFail=async(payload)=>axiosWithCreds.post("/file/uploads/failed",payload);
+
+export const fetchDuplicateFiles=async ()=>axiosWithCreds.get("/file/duplicate-resource")
+
+//* delete duplicates of file at once
+export const deleteAllDuplicates=async (payload)=>axiosWithCreds.delete("/file/duplicate/delete-all",{data:payload})
+
+//* move duplicates to trash
+export const moveDuplicatesToTrash=async (payload)=>axiosWithCreds.patch("/file/duplicates/move-to-trash",{data:payload});
+//* fetch old resources
+export const fetchOldResources=async ()=>axiosWithCreds.get("/file/old-resources");
+
+//* fetch large file
+export const fetchLargeFiles=async ()=>axiosWithCreds.get("file/large-file");

@@ -53,12 +53,11 @@ export default function DriveTrashPage() {
 
   const permanentDeleteDirectoryHandle=async (dirId)=>{
     try{
-      console.log("permanent directory function is running");
-    const data=await permanentDeleteDirectory(dirId);
-    console.log("data",data);
-    setTrashTempItem((prev)=>{
+      setTrashTempItem((prev)=>{
         return prev.filter((dir)=>dir._id!=dirId)
        })
+      const data=await permanentDeleteDirectory(dirId);
+    
     }catch(err){
       console.log(err.message);
     } 
@@ -66,11 +65,10 @@ export default function DriveTrashPage() {
 
   const permanentDeleteFileHandle=async (fileId)=>{
     try{
-    console.log("file delete function is runnning");
-    await permanentDeleteFile(fileId);
     setTrashTempItem((prev)=>{
         return prev.filter((file)=>file._id!=fileId)
     })
+    await permanentDeleteFile(fileId);
     }catch(err){
       console.log("error",err)
      }

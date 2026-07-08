@@ -26,6 +26,9 @@ import ManagePlan from "./pages/ManagePlan";
 import SharedResource from "./pages/SharedResource.jsx";
 import { SharedWithMe } from "./pages/ShareWithMe.jsx";
 import { ShareByMe} from "./pages/ShareByMe.jsx";
+import { StorageIntelligence } from "./pages/StorageIntelligence";
+import { DuplicatePage } from "./pages/DuplicateResourcePage";
+import { OldResourcePage } from "./pages/OldResourcePage";
 
 function ProtectedLayout() {
   useEffect(() => {
@@ -97,6 +100,18 @@ const router = createBrowserRouter([
         path:"/shared-by-me",
         element:<ShareByMe />
       },
+      {
+        path:"/storage-intelligence",
+        element:<StorageIntelligence/>
+      },
+      {
+        path:"/old-resource",
+        element:<OldResourcePage/>
+      },
+      {
+        path:"/duplicate-resource",
+        element:<DuplicatePage />
+      }
       
     ],
   },
@@ -104,6 +119,7 @@ const router = createBrowserRouter([
         path:"/plan",
         element:<SubcriptionPage/>,
       },
+
       {
         path:"/share/:resourceType/:token",
         element:<SharedResource />

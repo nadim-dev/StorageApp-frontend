@@ -70,6 +70,10 @@ function DirectoryHeader({
 
   const isDriveMode = mode === "drive";
 
+  if (mode === "storage-intelligence") {
+  return null;
+}
+
 
   return (
     <header className="directory-header">
