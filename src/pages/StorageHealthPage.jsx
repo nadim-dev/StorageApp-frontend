@@ -9,7 +9,6 @@ import {
   Copy,
   FileText,
   HardDrive,
-  RefreshCcw,
   ShieldCheck,
   Trash2,
   TrendingUp,
@@ -103,20 +102,6 @@ function StorageHealthDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchStorageHealth = async () => {
-    try {
-      setIsLoading(true);
-      setError("");
-      const data = await storageHealthCalculator();
-      setHealthData(normalizeStorageHealthData(data));
-    } catch (err) {
-      console.error("Failed to calculate storage health", err);
-      setError(err.message || "Storage health is unavailable right now.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     let isMounted = true;
 
@@ -198,14 +183,6 @@ function StorageHealthDashboard() {
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <button
-            type="button"
-            onClick={() => navigate("/storage-intelligence")}
-            className="mb-4 inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
             Storage Health
           </h1>
@@ -216,12 +193,11 @@ function StorageHealthDashboard() {
 
         <button
           type="button"
-          onClick={fetchStorageHealth}
-          disabled={isLoading}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-violet-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
+          onClick={() => navigate("/storage-intelligence")}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
         >
-          <RefreshCcw size={16} className={isLoading ? "animate-spin" : ""} />
-          {isLoading ? "Scanning" : "Recalculate"}
+          <ArrowLeft size={16} />
+          Back
         </button>
       </div>
 
