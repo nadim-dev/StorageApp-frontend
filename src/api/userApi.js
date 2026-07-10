@@ -69,7 +69,7 @@ export const storageBreakDown=async ()=>
 //* calculating user storage health
 
 export const storageHealthCalculator=async ()=>
-  axiosWithCreds.get("user/dashboard/storage-health")
+  axiosWithCreds.get("user/storage/storage-health")
 
 //* showing recommendation to users
 export const showRecommendation=async ()=>

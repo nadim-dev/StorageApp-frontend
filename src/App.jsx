@@ -27,6 +27,7 @@ import SharedResource from "./pages/SharedResource.jsx";
 import { SharedWithMe } from "./pages/ShareWithMe.jsx";
 import { ShareByMe} from "./pages/ShareByMe.jsx";
 import { StorageIntelligence } from "./pages/StorageIntelligence";
+import { StorageHealthPage } from "./pages/StorageHealthPage";
 import { DuplicatePage } from "./pages/DuplicateResourcePage";
 import { OldResourcePage } from "./pages/OldResourcePage";
 
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
       {
         path:"/storage-intelligence",
         element:<StorageIntelligence/>
+      },
+      {
+        path:"/storage-health",
+        element:<StorageHealthPage/>
       },
       {
         path:"/old-resource",

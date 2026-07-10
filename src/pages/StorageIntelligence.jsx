@@ -1,7 +1,8 @@
 import DriveUILayout from "@/components/DriveUILayout";
 import { useAuth } from "@/context/authContext";
 import { formatFileSize } from "@/utils/formatFile";
-import {CalendarClock,ChartNoAxesCombined,CheckCircle2,ChevronDown,Copy,Eye,FileText,FolderOpen,RefreshCcw,Split,Trash2} from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {ArrowRight,CalendarClock,ChartNoAxesCombined,CheckCircle2,ChevronDown,Copy,Eye,FileText,FolderOpen,ShieldCheck,Split,Trash2} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { storageBreakDown,showRecommendation} from "@/api/userApi";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -17,6 +18,215 @@ const breakdownColors = {
   Archives: "#fb923c",
   Others: "#d1d5db",
 };
+
+const storageHealthSteps = [
+  "Checking duplicate files",
+  "Finding old unused files",
+  "Scanning large files",
+  "Reviewing trash",
+  "Calculating storage health score",
+];
+
+const particlePositions = [
+  "left-5 top-5 h-1.5 w-1.5",
+  "right-7 top-8 h-2 w-2",
+  "bottom-6 left-10 h-1 w-1",
+  "bottom-8 right-12 h-1.5 w-1.5",
+];
+
+const MotionDiv = motion.div;
+const MotionButton = motion.button;
+const MotionSection = motion.section;
+const MotionSpan = motion.span;
+
+function StorageHealthEntryCard() {
+  const navigate = useNavigate();
+  const shouldReduceMotion = useReducedMotion();
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState(0);
+  const routeTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => window.clearTimeout(routeTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!isAnalyzing) {
+      return undefined;
+    }
+
+    if (completedSteps < storageHealthSteps.length) {
+      const stepTimer = window.setTimeout(() => {
+        setCompletedSteps((currentStep) => currentStep + 1);
+      }, 450);
+
+      return () => window.clearTimeout(stepTimer);
+    }
+
+    const navigationTimer = window.setTimeout(() => {
+      setIsAnalyzing(false);
+
+      routeTimerRef.current = window.setTimeout(() => {
+        navigate("/storage-health");
+      }, shouldReduceMotion ? 0 : 220);
+    }, 550);
+
+    return () => window.clearTimeout(navigationTimer);
+  }, [completedSteps, isAnalyzing, navigate, shouldReduceMotion]);
+
+  const startAnalysis = () => {
+    setCompletedSteps(0);
+    setIsAnalyzing(true);
+  };
+
+  return (
+    <>
+      <MotionSection
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+        animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+        whileHover={shouldReduceMotion ? {} : { y: -5, scale: 1.02 }}
+        transition={{ duration: 0.45, ease: [0.22, 0.61, 0.36, 1] }}
+        className="rounded-2xl bg-gradient-to-r from-blue-500/70 via-violet-500/70 to-purple-500/70 p-[1px] shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
+        aria-labelledby="storage-health-title"
+      >
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="relative shrink-0">
+                {particlePositions.map((position) => (
+                  <MotionSpan
+                    key={position}
+                    aria-hidden="true"
+                    className={`absolute rounded-full bg-blue-400/50 ${position}`}
+                    animate={
+                      shouldReduceMotion
+                        ? {}
+                        : { opacity: [0.25, 0.8, 0.25], y: [0, -6, 0] }
+                    }
+                    transition={{
+                      duration: 2.8,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))}
+
+                <MotionDiv
+                  className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-600 shadow-inner"
+                  animate={shouldReduceMotion ? {} : { y: [0, -6, 0] }}
+                  transition={{
+                    duration: 3.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <ShieldCheck size={31} strokeWidth={2.2} />
+                </MotionDiv>
+              </div>
+
+              <div className="min-w-0">
+                <h2
+                  id="storage-health-title"
+                  className="text-xl font-bold text-slate-950"
+                >
+                  Storage Health
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-slate-500">
+                  Analyze how efficiently your storage is being used.
+                </p>
+              </div>
+            </div>
+
+            <MotionButton
+              type="button"
+              onClick={startAnalysis}
+              aria-label="Analyze Storage"
+              whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.96 }}
+              animate={
+                shouldReduceMotion
+                  ? {}
+                  : {
+                      boxShadow: [
+                        "0 12px 24px rgba(59, 130, 246, 0.24)",
+                        "0 16px 34px rgba(124, 58, 237, 0.34)",
+                        "0 12px 24px rgba(59, 130, 246, 0.24)",
+                      ],
+                    }
+              }
+              transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+              className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#2563EB] px-6 text-sm font-bold text-white shadow-lg shadow-blue-500/25 outline-none transition hover:bg-[#1D4ED8] focus-visible:ring-4 focus-visible:ring-blue-200 sm:w-auto"
+            >
+              Analyze Storage
+              <ArrowRight
+                size={18}
+                className="transition-transform duration-200 group-hover:translate-x-1"
+                aria-hidden="true"
+              />
+            </MotionButton>
+          </div>
+        </div>
+      </MotionSection>
+
+      <AnimatePresence>
+        {isAnalyzing && (
+          <MotionDiv
+            className="fixed inset-0 z-[1400] flex items-center justify-center overflow-y-auto bg-white/60 px-4 pb-24 pt-4 backdrop-blur-sm sm:pb-24"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="status"
+            aria-live="polite"
+            aria-label="Analyzing your storage"
+          >
+            <MotionDiv
+              className="w-full max-w-sm rounded-2xl border border-white/15 bg-white p-4 text-center shadow-2xl sm:p-5"
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 16, scale: 0.98 }}
+              animate={shouldReduceMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
+              exit={shouldReduceMotion ? {} : { opacity: 0, y: 10, scale: 0.98 }}
+            >
+              <MotionDiv
+                className="mx-auto h-12 w-12 rounded-full border-4 border-blue-100 border-t-blue-600 border-r-purple-600 sm:h-14 sm:w-14"
+                animate={shouldReduceMotion ? {} : { rotate: 360 }}
+                transition={{ duration: 0.95, repeat: Infinity, ease: "linear" }}
+                aria-hidden="true"
+              />
+
+              <h2 className="mt-3 text-lg font-bold text-slate-950 sm:text-xl">
+                Analyzing Your Storage
+              </h2>
+
+              <div className="mt-4 max-h-[46vh] space-y-2 overflow-y-auto pr-1 text-left">
+                <AnimatePresence initial={false}>
+                  {storageHealthSteps.slice(0, completedSteps).map((step) => (
+                    <MotionDiv
+                      key={step}
+                      initial={shouldReduceMotion ? false : { opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 8 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600"
+                    >
+                      <MotionSpan
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
+                        initial={false}
+                        animate={shouldReduceMotion ? {} : { scale: [0.8, 1.15, 1] }}
+                        transition={{ duration: 0.28 }}
+                      >
+                        <CheckCircle2 size={13} aria-hidden="true" />
+                      </MotionSpan>
+                      <span>{step}</span>
+                    </MotionDiv>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </MotionDiv>
+          </MotionDiv>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
 
 const recommendationMeta = {
   duplicate: {
@@ -348,6 +558,8 @@ export const StorageIntelligence = () => {
             );
           })}
         </div>
+
+        <StorageHealthEntryCard />
 
         <section className="rounded-lg border border-slate-100 bg-white p-5 shadow-sm lg:w-3/4 xl:w-2/3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
