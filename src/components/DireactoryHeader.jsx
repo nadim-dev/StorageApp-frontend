@@ -165,7 +165,13 @@ function DirectoryHeader({
 
         {/* User Icon & Dropdown Menu */}
         <div className="user-menu-container" ref={userMenuRef}>
-        <button className="icon-button" onClick={handleUserIconClick}>
+        <button
+          className="icon-button user-profile-button"
+          onClick={handleUserIconClick}
+          title={user ? "Account menu" : "Login"}
+          aria-label={user ? "Open account menu" : "Login"}
+          aria-expanded={showUserMenu}
+        >
         {user?.picture ? (
           <img
             className="user-picture"

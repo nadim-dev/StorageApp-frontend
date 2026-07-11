@@ -144,7 +144,7 @@ export default function RecentPage() {
             <FaClock />
             <span>Recently opened</span>
           </p>
-          <span>{recentItems.length} items</span>
+          <span>{recentItems.length} {recentItems.length === 1 ? "item" : "items"}</span>
         </div>
 
         <div className="recent-items-grid">
@@ -153,15 +153,17 @@ export default function RecentPage() {
             return (
             <article
               key={item._id}
-              className="recent-card hover:cursor-pointer"
+              className={`recent-card hover:cursor-pointer ${activeContextMenu == item._id ? "is-menu-open" : ""}`}
               onClick={() => handleOpenRecentFile(item._id)}
             >
               <div className="recent-card-main">
                 <span className={"recent-icon file"}>{renderFileIcon("."+item.name.split(".").pop())}</span>
                 <div className="recent-meta">
                   <h3>{item.name}</h3>
-                  <p>Opened: {formatDate(item.lastAccessedAt)}</p>
-                  <p>{formatFileSize(item.size)}</p>
+                  <div className="recent-meta-chips">
+                    <span>Opened {formatDate(item.lastAccessedAt)}</span>
+                    <span>{formatFileSize(item.size)}</span>
+                  </div>
                 </div>
               </div>
               <div className="recent-card-actions">
