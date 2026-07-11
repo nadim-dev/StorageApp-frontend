@@ -1,5 +1,5 @@
 import DriveUILayout from "../components/DriveUILayout";
-import { FaFolder, FaFileAlt, FaTrashAlt, FaUndoAlt } from "react-icons/fa";
+import { FaClock, FaFolder, FaTrashAlt, FaUndoAlt } from "react-icons/fa";
 import { formatFileSize } from "../utils/formatFile";
 import { formatDate } from "../utils/formatDate";
 import { renderFileIcon } from "../components/common/getFileIcon";
@@ -7,7 +7,7 @@ import "../DirectoryView.css";
 import "../DriveTrashPage.css";
 import { useEffect,useState } from "react";
 import { accessTrashItem, restoreFile,restoreDirectory,permanentDeleteFile,permanentDeleteDirectory } from "../api/trashApi.js";
-
+import { viewFile } from "@/api/fileApi";
 export default function DriveTrashPage() {
   const [tempTrashItems,setTrashTempItem]=useState([]);
   const [allTrashItems,setAllTrashItems]=useState([]);
@@ -89,30 +89,47 @@ export default function DriveTrashPage() {
     <DriveUILayout active="trash" headerMode="trash" query={query} setQuery={setQuery}>
       <section className="trash-board">
         <div className="trash-board-top">
-          <p>Recently deleted items</p>
-          <span>{tempTrashItems.length} items</span>
+          <div>
+            <p>Recently deleted items</p>
+            <small>Restore items or remove them permanently from your drive.</small>
+          </div>
+          <span>{tempTrashItems.length} {tempTrashItems.length === 1 ? "item" : "items"}</span>
         </div>
 
         <div className="trash-items-grid">
           {tempTrashItems.map((item) => (
-            <article key={item._id} className="trash-card">
+            <article key={item._id} className="trash-card cursor-pointer" 
+              onClick={async ()=>{
+                const {url}=await viewFile(item._id);
+                window.open(url,"_blank")
+             }}>
               <div className="trash-card-main">
-                <div className={`trash-icon ${item.type === "folder" ? "folder" : "file"}`}>
-                  {item.type === "folder" ? <FaFolder /> : renderFileIcon(item.extension)}
+                <div className="trash-card-top">
+                  <div className={`trash-icon ${item.type === "folder" ? "folder" : "file"}`}>
+                    {item.type === "folder" ? <FaFolder /> : renderFileIcon(item.extension)}
+                  </div>
+                  <span className={`trash-type-badge ${item.type === "folder" ? "folder" : "file"}`}>
+                    {item.type === "folder" ? "Folder" : item.extension?.replace(".", "").toUpperCase() || "File"}
+                  </span>
                 </div>
                 <div className="trash-meta">
                   <h3 className="filename">{item.name}</h3>
-                  <p>Deleted: {formatDate(item.deletedAt)}</p>
-                  <p>{item.type === "folder" ? "Folder" : formatFileSize(item.size)}</p>
+                  <div className="trash-card-details">
+                    <span>
+                      <FaClock aria-hidden="true" />
+                      Deleted {formatDate(item.deletedAt)}
+                    </span>
+                    <span>{item.type === "folder" ? "Folder" : formatFileSize(item.size)}</span>
+                  </div>
                 </div>
               </div>
 
               <div className="trash-actions">
-                <button type="button" className="trash-restore-btn " onClick={()=>item.type == "folder" ? directoryRestoreHandle(item._id) :fileRestoreHandle(item._id)}>
+                <button type="button" className="trash-restore-btn " onClick={(e)=>{e.stopPropagation();item.type == "folder" ? directoryRestoreHandle(item._id) : fileRestoreHandle(item._id)}}>
                   <FaUndoAlt className="restore-icon" />
                   <span>Restore</span>
                 </button>
-                <button type="button" className="trash-delete-btn" onClick={()=> item.type == "folder" ? permanentDeleteDirectoryHandle(item._id) : permanentDeleteFileHandle(item._id)}>
+                <button type="button" className="trash-delete-btn" onClick={(e)=>{e.stopPropagation();item.type == "folder" ? permanentDeleteDirectoryHandle(item._id) : permanentDeleteFileHandle(item._id)}}>
                   <FaTrashAlt />
                   <span>Delete forever</span>
                 </button>

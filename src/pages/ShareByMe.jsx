@@ -26,6 +26,7 @@ import "../DirectoryView.css";
 import Toast from "../components/Toast.jsx";
 import useToast from "../hooks/useToast.js";
 import { useAuth } from "@/context/authContext";
+import { viewFile } from "@/api/fileApi";
 
 function isDirectoryItem(item) {
   return item.resourceType === "directory";
@@ -539,7 +540,11 @@ export const ShareByMe = () => {
                     className={`shared-row ${openMenuId === item._id ? "is-menu-open" : ""}`}
                     key={item._id}
                   >
-                    <div className="shared-name-cell">
+                    <div className="shared-name-cell cursor-pointer"
+                     onClick={async ()=>{
+                      const {url}=await viewFile(item._id);
+                      window.open(url,"_blank")
+                     }}>
                       <span className="shared-resource-icon">
                         {item.resourceType == "folder" ? <FaFolder className="shared-folder-icon" /> : renderFileIcon(item.extension)}
                       </span>

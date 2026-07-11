@@ -194,7 +194,7 @@ function StorageHealthDashboard() {
         <button
           type="button"
           onClick={() => navigate("/storage-intelligence")}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
+          className="inline-flex h-11 items-center cursor-pointer justify-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
         >
           <ArrowLeft size={16} />
           Back
