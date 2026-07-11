@@ -56,7 +56,7 @@ export default function DriveTrashPage() {
       setTrashTempItem((prev)=>{
         return prev.filter((dir)=>dir._id!=dirId)
        })
-      const data=await permanentDeleteDirectory(dirId);
+       await permanentDeleteDirectory(dirId);
     
     }catch(err){
       console.log(err.message);
@@ -119,7 +119,7 @@ export default function DriveTrashPage() {
                       <FaClock aria-hidden="true" />
                       Deleted {formatDate(item.deletedAt)}
                     </span>
-                    <span>{item.type === "folder" ? "Folder" : formatFileSize(item.size)}</span>
+                    <span>{formatFileSize(item.size)}</span>
                   </div>
                 </div>
               </div>

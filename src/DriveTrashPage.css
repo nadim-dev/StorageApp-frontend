@@ -191,7 +191,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .trash-card-details span {

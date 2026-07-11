@@ -468,7 +468,7 @@ export const StorageIntelligence = () => {
         // query={query}
         // setQuery={setQuery}
     >
-      <div className="space-y-8 p-4  md:p-1">
+      <div className="space-y-8 p-4 md:p-1">
         <div className="flex items-start gap-3">
 
           <div className="mt-1">
@@ -490,7 +490,7 @@ export const StorageIntelligence = () => {
 
 
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">
+            <h1 className="text-4xl mt-1 font-bold text-gray-900">
               Storage Intelligence
             </h1>
 

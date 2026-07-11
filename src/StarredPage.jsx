@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaStar, FaRegStar, FaClock, FaFolder } from "react-icons/fa";
+import { FaFileAlt, FaStar, FaRegStar, FaClock, FaFolder } from "react-icons/fa";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import DriveUILayout from "./components/DriveUILayout";
+import ContextMenu from "./components/ContextMenu";
+import RenameModal from "./components/RenameModal";
+import ShareModal from "./components/ShareModal";
+import Toast from "./components/Toast";
 import { renderFileIcon } from "./components/common/getFileIcon";
 import { formatDate } from "./utils/formatDate";
 import { formatFileSize } from "./utils/formatFile";
-import { getStarredResources, starredFile, viewFile } from "./api/fileApi";
-import { starredDirectory } from "./api/directoryApi";
+import { getStarredResources, renameFile, starredFile, temporaryDeleteFile, viewFile } from "./api/fileApi";
+import { renameDirectory, starredDirectory, temporaryDeleteFolder } from "./api/directoryApi";
+import useCloseContextMenu from "./hooks/useCloseContextMenu";
+import useToast from "./hooks/useToast";
 
 import "./DirectoryView.css";
 import "./StarredPage.css";
@@ -18,6 +25,13 @@ function StarredPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [query,setQuery]=useState("");
+  const [activeContextMenu, setActiveContextMenu] = useState(null);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameType, setRenameType] = useState(null);
+  const [renameId, setRenameId] = useState(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [shareItem, setShareItem] = useState(null);
+  const { toast, showToast, hideToast } = useToast();
 
 
   const fetchStarredResources = useCallback(async () => {
@@ -45,18 +59,100 @@ function StarredPage() {
 
   const handleUnstar = async (itemId, isDirectory) => {
     const previousItems = starredItems;
+    const previousAllItems = allStarredItems;
     setStarredItems((prev) => prev.filter((item) => (item._id || item.id) !== itemId));
+    setallStarredItems((prev) => prev.filter((item) => (item._id || item.id) !== itemId));
 
     try {
       if (isDirectory) {
-        await starredDirectory(itemId, false);
+        await starredDirectory(itemId, { starred: false });
       } else {
-        await starredFile(itemId, false);
+        await starredFile(itemId, { starred: false });
       }
     } catch (err) {
       setStarredItems(previousItems);
+      setallStarredItems(previousAllItems);
     }
   };
+
+  const openRenameModal = useCallback((type, id, currentName) => {
+    setActiveContextMenu(null);
+    setRenameType(type);
+    setRenameId(id);
+    setRenameValue(currentName);
+    setShowRenameModal(true);
+  }, []);
+
+  const handleRenameSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    if (!renameId) return;
+
+    try {
+      if (renameType === "directory") {
+        await renameDirectory(renameId, renameValue);
+      } else {
+        await renameFile(renameId, renameValue);
+      }
+
+      const updateName = (items) =>
+        items.map((item) =>
+          (item._id || item.id) === renameId ? { ...item, name: renameValue } : item
+        );
+
+      setStarredItems(updateName);
+      setallStarredItems(updateName);
+    } catch (err) {
+      console.log(err.message);
+    }
+
+    setShowRenameModal(false);
+    setRenameType(null);
+    setRenameId(null);
+    setRenameValue("");
+  }, [renameId, renameType, renameValue]);
+
+  const openShareModal = useCallback((item) => {
+    setActiveContextMenu(null);
+    setShareItem(item);
+  }, []);
+
+  const handlePublicLinkCopied = useCallback(() => {
+    showToast("Public link copied to clipboard", {
+      title: "Link copied",
+      type: "success",
+    });
+  }, [showToast]);
+
+  const handleDeleteFile = useCallback(async (fileId) => {
+    try {
+      await temporaryDeleteFile(fileId);
+      setStarredItems((prev) => prev.filter((item) => (item._id || item.id) !== fileId));
+      setallStarredItems((prev) => prev.filter((item) => (item._id || item.id) !== fileId));
+    } catch (err) {
+      console.log(err.message);
+    }
+  }, []);
+
+  const handleDeleteDirectory = useCallback(async (dirId) => {
+    try {
+      await temporaryDeleteFolder(dirId);
+      setStarredItems((prev) => prev.filter((item) => (item._id || item.id) !== dirId));
+      setallStarredItems((prev) => prev.filter((item) => (item._id || item.id) !== dirId));
+    } catch (err) {
+      console.log(err.message);
+    }
+  }, []);
+
+  const handleContextMenu = useCallback((e, id) => {
+    e.stopPropagation();
+    setActiveContextMenu((prev) => (prev === id ? null : id));
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setActiveContextMenu(null);
+  }, []);
+
+  useCloseContextMenu(setActiveContextMenu);
 
   useEffect(()=>{
   if(!query)
@@ -89,7 +185,12 @@ function handleOpenResource(item) {
               <FaStar />
               <span>Favorites</span>
             </p>
-            <h2>Your starred essentials, ready when you are.</h2>
+            <h2>Quick access to your starred files and folders.</h2>
+          </div>
+          <div className="starred-summary">
+            <span>{folders.length} folders</span>
+            <span>{files.length} files</span>
+            <strong>{starredItems.length} starred</strong>
           </div>
         </div>
 
@@ -110,7 +211,7 @@ function handleOpenResource(item) {
           <div className="directory-content-board">
             <section className="resource-section">
               <div className="resource-section-head">
-                <h2>Folders</h2>
+                <h2><FaFolder /> Folders</h2>
                 <span>{folders.length}</span>
               </div>
               {folders.length === 0 ? (
@@ -119,7 +220,7 @@ function handleOpenResource(item) {
                 <div className="directory-list directory-grid folders-grid">
                   {folders.map((item) => (
                     <div
-                      key={crypto.randomUUID()}
+                      key={item._id || item.id}
                       className="list-item hoverable-row folder-card group"
                       onClick={() => handleOpenResource(item)}
                     >
@@ -128,13 +229,39 @@ function handleOpenResource(item) {
                           <FaFolder className="folder-icon" />
                         </div>
                         <div className="item-top-actions">
-                          <FaStar
+                          <button
+                            type="button"
+                            className="item-star-toggle is-active"
+                            aria-label="Remove from starred"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleUnstar(item._id, true);
                             }}
-                            className="cursor-pointer transition-all duration-300 text-yellow-400 opacity-100 scale-110"
-                          />
+                          >
+                            <FaStar className="item-star-icon" />
+                          </button>
+                          <button
+                            className="context-menu-trigger"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleContextMenu(e, item._id);
+                            }}
+                            type="button"
+                          >
+                            <BsThreeDotsVertical />
+                          </button>
+                          {activeContextMenu === item._id && (
+                            <ContextMenu
+                              item={item}
+                              closeMenu={closeMenu}
+                              openRenameModal={openRenameModal}
+                              handleDeleteFile={handleDeleteFile}
+                              handleDeleteDirectory={handleDeleteDirectory}
+                              openShareModal={openShareModal}
+                              onPublicLinkCopied={handlePublicLinkCopied}
+                            />
+                          )}
                         </div>
                       </div>
                       <div className="item-meta">
@@ -157,7 +284,7 @@ function handleOpenResource(item) {
 
             <section className="resource-section">
               <div className="resource-section-head">
-                <h2>Files</h2>
+                <h2><FaFileAlt /> Files</h2>
                 <span>{files.length}</span>
               </div>
               {files.length === 0 ? (
@@ -173,13 +300,39 @@ function handleOpenResource(item) {
                       <div className="item-card-top">
                         <div className="item-icon-wrap">{renderFileIcon(item.extension)}</div>
                         <div className="item-top-actions">
-                          <FaStar
+                          <button
+                            type="button"
+                            className="item-star-toggle is-active"
+                            aria-label="Remove from starred"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleUnstar(item._id || item.id, false);
                             }}
-                            className="cursor-pointer transition-all duration-300 text-yellow-400 opacity-100 scale-110"
-                          />
+                          >
+                            <FaStar className="item-star-icon" />
+                          </button>
+                          <button
+                            className="context-menu-trigger"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleContextMenu(e, item._id || item.id);
+                            }}
+                            type="button"
+                          >
+                            <BsThreeDotsVertical />
+                          </button>
+                          {activeContextMenu === (item._id || item.id) && (
+                            <ContextMenu
+                              item={item}
+                              closeMenu={closeMenu}
+                              openRenameModal={openRenameModal}
+                              handleDeleteFile={handleDeleteFile}
+                              handleDeleteDirectory={handleDeleteDirectory}
+                              openShareModal={openShareModal}
+                              onPublicLinkCopied={handlePublicLinkCopied}
+                            />
+                          )}
                         </div>
                       </div>
                       <div className="item-meta">
@@ -201,6 +354,22 @@ function handleOpenResource(item) {
             </section>
           </div>
         )}
+        {showRenameModal && (
+          <RenameModal
+            renameType={renameType}
+            renameValue={renameValue}
+            setRenameValue={setRenameValue}
+            onClose={() => setShowRenameModal(false)}
+            onRenameSubmit={handleRenameSubmit}
+          />
+        )}
+        {shareItem && (
+          <ShareModal
+            item={shareItem}
+            onClose={() => setShareItem(null)}
+          />
+        )}
+        <Toast toast={toast} onClose={hideToast} />
       </section>
     </DriveUILayout>
   );
